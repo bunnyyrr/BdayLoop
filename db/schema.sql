@@ -9,7 +9,8 @@ CREATE TABLE users (
 
 CREATE TABLE groups(
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL UNIQUE
+    name TEXT NOT NULL UNIQUE,
+    created_by INTEGER REFERENCES users(id) ON DELETE SET NULL;
 );
 
 CREATE TABLE group_members(

@@ -13,23 +13,24 @@ import java.util.Optional;
 
 public class GroupDao {
     public Group create(Group group) throws SQLException{
-        String sql = "INSERT INTO groups (name) VALUES(?) RETURNING id";
+        String sql = "INSERT INTO groups (name, created_by) VALUES(?, ?) RETURNING id";
 
         try(Connection conn = ConnectionManager.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, group.getName());
+            ps.setInt(2, group.getCreatedBy());
 
             try(ResultSet rs = ps.executeQuery()){
                 if(rs.next()){
                     int newId = rs.getInt("id");
-                    return new Group(newId, group.getName());
+                    return new Group(newId, group.getName(), group.getCreatedBy());
                 }
                 else throw new SQLException("INSERT не вернул сгенерированный id");
             }
         }
     }
     public Optional<Group> findById(int id) throws SQLException{
-        String sql = "SELECT id, name FROM groups WHERE id =?";
+        String sql = "SELECT id, name, created_by FROM groups WHERE id =?";
 
         try(Connection conn=ConnectionManager.getConnection();
         PreparedStatement ps =conn.prepareStatement(sql)){
@@ -42,7 +43,7 @@ public class GroupDao {
     }
 
     public List<Group> findAll() throws SQLException{
-        String sql ="SELECT id, name FROM groups";
+        String sql ="SELECT id, name, created_by FROM groups";
 
         try(Connection conn = ConnectionManager.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql);
@@ -91,7 +92,26 @@ public class GroupDao {
         }
     }
 
+    public void delete(int groupId, int requesterId) throws SQLException{
+        Optional<Group> group = findById(groupId);
+
+        if(group.isEmpty()){
+            throw new SQLException(("Группа с id "+ groupId + " не найдена"));
+        }
+        Integer createdBy = group.get().getCreatedBy();
+        if(createdBy == null || createdBy != requesterId){
+            throw new SQLException(("Только создатель может удалить группу"));
+        }
+
+        String sql = " DELETE FROM groups WHERE id =?";
+        try(Connection conn = ConnectionManager.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, groupId);
+            ps.executeUpdate();
+        }
+    }
+
     private Group mapRow(ResultSet rs) throws SQLException{
-        return new Group(rs.getInt("id"), rs.getString("name"));
+        return new Group(rs.getInt("id"), rs.getString("name"), rs.getObject("created_by", Integer.class));
     }
 }
