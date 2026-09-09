@@ -42,6 +42,23 @@ public class GroupDao {
         }
     }
 
+    public List<Group> findByName(String name) throws SQLException{
+        String sql = "SELECT id, name, created_by FROM groups WHERE name ILIKE ?";
+
+        try(Connection conn=ConnectionManager.getConnection();
+            PreparedStatement ps =conn.prepareStatement(sql)){
+            ps.setString(1,"%"+ name+"%");
+
+            try(ResultSet rs = ps.executeQuery()){
+                List<Group> result = new ArrayList<>();
+                while(rs.next()){
+                    result.add(mapRow(rs));
+                }
+                return result;
+            }
+        }
+    }
+
     public List<Group> findAll() throws SQLException{
         String sql ="SELECT id, name, created_by FROM groups";
 
@@ -110,6 +127,43 @@ public class GroupDao {
             ps.executeUpdate();
         }
     }
+
+    public void leaveGroup(int groupId, int userId) throws SQLException{
+        String sql ="DELETE FROM group_members WHERE group_id=? AND user_id=?";
+
+        try(Connection conn = ConnectionManager.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, groupId);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void unsubscribeFromGroup(int subscriberId, int groupId) throws SQLException{
+        String sql ="DELETE FROM group_subscriptions WHERE subscriber_id=? AND group_id=?";
+
+        try(Connection conn = ConnectionManager.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, subscriberId);
+            ps.setInt(2, groupId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void update(Group group) throws SQLException{
+        String sql ="UPDATE groups SET name=? WHERE id=?";
+        try(Connection conn = ConnectionManager.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setString(1, group.getName());
+            ps.setInt(2, group.getId());
+            int rowsAffected = ps.executeUpdate();
+            if(rowsAffected==0){
+                throw new SQLException("Группа с id "+ group.getId() + " не найдена для обновления");
+            }
+        }
+    }
+
+
 
     private Group mapRow(ResultSet rs) throws SQLException{
         return new Group(rs.getInt("id"), rs.getString("name"), rs.getObject("created_by", Integer.class));
