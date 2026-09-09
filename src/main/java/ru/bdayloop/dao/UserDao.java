@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class UserDao {
@@ -88,6 +90,43 @@ public class UserDao {
             int rowsAffected = ps.executeUpdate();
             if(rowsAffected == 0){
                 throw new SQLException("Пользователь с id " + id +" не найден для удаления");
+            }
+        }
+    }
+    public void subscribe(int subscriberId, int targetId) throws SQLException{
+        String sql = "INSERT INTO subscriptions(subscriber_id, target_id) VALUES(?,?)";
+        try(Connection conn = ConnectionManager.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, subscriberId);
+            ps.setInt(2, targetId);
+            ps.executeUpdate();
+        }
+    }
+
+    public void unsubscribe(int subscriberId, int targetId) throws SQLException{
+        String sql = "DELETE FROM subscriptions WHERE subscriber_id=? AND target_id=?";
+
+        try(Connection conn = ConnectionManager.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+            ps.setInt(1, subscriberId);
+            ps.setInt(2, targetId);
+            ps.executeUpdate();
+        }
+    }
+
+    public List<User> findByName(String name) throws SQLException{
+        String sql = "SELECT id, name, birthday, username, password_hash, role FROM users WHERE name ILIKE ?";
+
+        try(Connection conn = ConnectionManager.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%"+ name +"%");
+
+            try(ResultSet rs = ps.executeQuery()){
+                List<User> result = new ArrayList<>();
+                while(rs.next()){
+                    result.add(mapRow(rs));
+                }
+                return result;
             }
         }
     }
