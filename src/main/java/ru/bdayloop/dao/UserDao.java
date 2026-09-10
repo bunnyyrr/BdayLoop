@@ -131,6 +131,20 @@ public class UserDao {
         }
     }
 
+    public boolean isSubscribed(int subscriberId, int targetId) throws SQLException{
+        String sql ="SELECT 1 FROM subscriptions WHERE subscriber_id = ? AND target_id = ?";
+
+        try(Connection conn= ConnectionManager.getConnection();
+        PreparedStatement ps =conn.prepareStatement(sql)){
+            ps.setInt(1, subscriberId);
+            ps.setInt(2, targetId);
+
+            try(ResultSet rs = ps.executeQuery()){
+                return rs.next();
+            }
+        }
+    }
+
     private User mapRow(ResultSet rs) throws SQLException{
         return new User(
                 rs.getInt("id"),
