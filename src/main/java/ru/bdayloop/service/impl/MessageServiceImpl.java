@@ -1,13 +1,14 @@
-package ru.bdayloop.service;
+package ru.bdayloop.service.impl;
 
 import ru.bdayloop.dao.MessageDao;
 import ru.bdayloop.dao.UserDao;
 import ru.bdayloop.model.Message;
+import ru.bdayloop.service.MessageService;
 
 import java.sql.SQLException;
 import java.util.List;
 
-public class MessageServiceImpl implements MessageService{
+public class MessageServiceImpl implements MessageService {
     private final MessageDao messageDao;
     private final UserDao userDao;
     public MessageServiceImpl(MessageDao messageDao, UserDao userDao){

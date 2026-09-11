@@ -1,14 +1,15 @@
-package ru.bdayloop.service;
+package ru.bdayloop.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
 import ru.bdayloop.dao.UserDao;
 import ru.bdayloop.model.User;
+import ru.bdayloop.service.UserService;
 
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     public UserServiceImpl(UserDao userDao){
         this.userDao =userDao;

@@ -1,4 +1,4 @@
-package ru.bdayloop.web;
+package ru.bdayloop.web.servlet;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;

@@ -3,9 +3,7 @@ package ru.bdayloop;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import ru.bdayloop.web.HelloServlet;
-
-import java.io.IOException;
+import ru.bdayloop.web.servlet.HelloServlet;
 
 public class Application {
     public static void main(String[] args) throws Exception {
