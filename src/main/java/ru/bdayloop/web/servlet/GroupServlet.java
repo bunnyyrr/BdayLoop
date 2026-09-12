@@ -125,10 +125,10 @@ public class GroupServlet extends HttpServlet {
             int id = Integer.parseInt(parts[1]);
             UserIdRequest body = JsonUtil.readBody(req, UserIdRequest.class);
 
-            if (parts.length == 3 || parts[2].equals("join")){
+            if (parts.length == 3 && parts[2].equals("join")){
                 groupService.leaveGroup(id, body.userId());
             }
-            else if (parts.length == 3 || parts[2].equals("subscribe")){
+            else if (parts.length == 3 && parts[2].equals("subscribe")){
                 groupService.unsubscribeFromGroup(body.userId(), id);
             }
             else{
