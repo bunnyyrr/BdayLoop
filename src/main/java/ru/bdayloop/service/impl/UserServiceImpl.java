@@ -71,6 +71,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void unsubscribe(int subscriberId, int targetId) throws SQLException{
-        userDao.subscribe(subscriberId, targetId);
+        userDao.unsubscribe(subscriberId, targetId);
     }
 }
