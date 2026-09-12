@@ -109,17 +109,7 @@ public class GroupDao {
         }
     }
 
-    public void delete(int groupId, int requesterId) throws SQLException{
-        Optional<Group> group = findById(groupId);
-
-        if(group.isEmpty()){
-            throw new SQLException(("Группа с id "+ groupId + " не найдена"));
-        }
-        Integer createdBy = group.get().getCreatedBy();
-        if(createdBy == null || createdBy != requesterId){
-            throw new SQLException(("Только создатель может удалить группу"));
-        }
-
+    public void delete(int groupId) throws SQLException{
         String sql = " DELETE FROM groups WHERE id =?";
         try(Connection conn = ConnectionManager.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)){
