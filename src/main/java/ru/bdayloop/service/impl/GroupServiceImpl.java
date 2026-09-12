@@ -1,6 +1,8 @@
 package ru.bdayloop.service.impl;
 
 import ru.bdayloop.dao.GroupDao;
+import ru.bdayloop.exception.ForbiddenException;
+import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.service.GroupService;
 
@@ -19,11 +21,11 @@ public class GroupServiceImpl implements GroupService {
         Optional<Group> group = groupDao.findById(groupId);
 
         if(group.isEmpty()){
-            throw new SQLException(("Группа с id "+ groupId + " не найдена"));
+            throw new NotFoundException(("Группа с id "+ groupId + " не найдена"));
         }
         Integer createdBy = group.get().getCreatedBy();
         if(createdBy == null || createdBy != requesterId){
-            throw new SQLException(("Только создатель может удалить группу"));
+            throw new ForbiddenException(("Только создатель может удалить группу"));
         }
         groupDao.delete(groupId);
     }
@@ -35,7 +37,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Group findById(int id) throws SQLException{
-        return groupDao.findById(id).orElseThrow(()-> new SQLException("Группа с id "+ id + " не найдена"));
+        return groupDao.findById(id).orElseThrow(()-> new NotFoundException("Группа с id "+ id + " не найдена"));
     }
 
     @Override

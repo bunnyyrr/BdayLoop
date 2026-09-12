@@ -2,6 +2,8 @@ package ru.bdayloop.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
 import ru.bdayloop.dao.UserDao;
+import ru.bdayloop.exception.NotFoundException;
+import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.UserService;
 
@@ -33,14 +35,14 @@ public class UserServiceImpl implements UserService {
     public User login(String username, String plainPassword) throws SQLException{
         Optional<User> found = userDao.findByUsername(username);
         if(found.isEmpty() || !BCrypt.checkpw(plainPassword, found.get().getPasswordHash())){
-            throw new SQLException("Неверный логин или пароль");
+            throw new UnauthorizedException("Неверный логин или пароль");
         }
         return found.get();
     }
 
     @Override
     public User findById(int id) throws SQLException{
-        return userDao.findById(id).orElseThrow(() -> new SQLException("Пользователь с id "+ id+" не найден"));
+        return userDao.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id "+ id+" не найден"));
     }
 
     @Override
@@ -50,7 +52,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findByUsername(String username) throws SQLException{
-        return userDao.findByUsername(username).orElseThrow(() -> new SQLException("Пользователь с username "+ username+" не найден")) ;
+        return userDao.findByUsername(username).orElseThrow(() -> new NotFoundException("Пользователь с username "+ username+" не найден")) ;
     }
 
     @Override

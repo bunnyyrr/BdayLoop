@@ -3,6 +3,9 @@ package ru.bdayloop.web.servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.bdayloop.exception.ForbiddenException;
+import ru.bdayloop.exception.NotFoundException;
+import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.service.GroupService;
 import ru.bdayloop.web.JsonUtil;
@@ -50,7 +53,13 @@ public class GroupServlet extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 }
             }
-        } catch (SQLException e){
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
+        }catch (SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NumberFormatException e) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
@@ -80,6 +89,12 @@ public class GroupServlet extends HttpServlet {
                     JsonUtil.writeBody(resp, group);
                 }
             }
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NumberFormatException e){
@@ -104,6 +119,12 @@ public class GroupServlet extends HttpServlet {
             Group updated = new Group(existing.getId(), body.name(), existing.getCreatedBy());
             groupService.update(updated);
             JsonUtil.writeBody(resp, updated);
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NumberFormatException e){
@@ -136,6 +157,12 @@ public class GroupServlet extends HttpServlet {
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NumberFormatException e){

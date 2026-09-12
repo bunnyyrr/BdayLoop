@@ -1,6 +1,7 @@
 package ru.bdayloop.dao;
 
 import ru.bdayloop.db.ConnectionManager;
+import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -39,7 +40,7 @@ public class GiftDao {
 
             int rowsAffected= ps.executeUpdate();
             if(rowsAffected ==0){
-                throw new SQLException("Подарок с id "+ id+ " не найден");
+                throw new NotFoundException("Подарок с id "+ id+ " не найден");
             }
         }
     }

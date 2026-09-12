@@ -3,6 +3,9 @@ package ru.bdayloop.web.servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.bdayloop.exception.ForbiddenException;
+import ru.bdayloop.exception.NotFoundException;
+import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.UserService;
 import ru.bdayloop.web.JsonUtil;
@@ -48,6 +51,12 @@ public class UserServlet extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 } else resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
@@ -69,6 +78,12 @@ public class UserServlet extends HttpServlet {
                 User user =userService.findById(id);
                 JsonUtil.writeBody(resp, user);
             }
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NumberFormatException e) {
@@ -77,11 +92,11 @@ public class UserServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException{
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         String pathInfo = req.getPathInfo();
 
-        try{
-            if(pathInfo==null || pathInfo.equals("/")){
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
@@ -93,8 +108,14 @@ public class UserServlet extends HttpServlet {
 
             User updated = new User(existing.getId(), body.name(), body.birthday(), body.username(), existing.getPasswordHash(), existing.getRole());
 
-            User result =userService.update(updated);
+            User result = userService.update(updated);
             JsonUtil.writeBody(resp, result);
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch(SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NumberFormatException e){
@@ -123,6 +144,12 @@ public class UserServlet extends HttpServlet {
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } catch (NotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (ForbiddenException e) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        } catch (UnauthorizedException e) {
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         } catch (SQLException e){
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch(NumberFormatException e){
