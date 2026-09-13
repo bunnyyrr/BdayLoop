@@ -1,6 +1,7 @@
 package ru.bdayloop.dao;
 
 import ru.bdayloop.db.ConnectionManager;
+import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;
 
 import java.sql.Connection;
@@ -109,17 +110,7 @@ public class GroupDao {
         }
     }
 
-    public void delete(int groupId, int requesterId) throws SQLException{
-        Optional<Group> group = findById(groupId);
-
-        if(group.isEmpty()){
-            throw new SQLException(("Группа с id "+ groupId + " не найдена"));
-        }
-        Integer createdBy = group.get().getCreatedBy();
-        if(createdBy == null || createdBy != requesterId){
-            throw new SQLException(("Только создатель может удалить группу"));
-        }
-
+    public void delete(int groupId) throws SQLException{
         String sql = " DELETE FROM groups WHERE id =?";
         try(Connection conn = ConnectionManager.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)){
@@ -158,12 +149,10 @@ public class GroupDao {
             ps.setInt(2, group.getId());
             int rowsAffected = ps.executeUpdate();
             if(rowsAffected==0){
-                throw new SQLException("Группа с id "+ group.getId() + " не найдена для обновления");
+                throw new NotFoundException("Группа с id "+ group.getId() + " не найдена для обновления");
             }
         }
     }
-
-
 
     private Group mapRow(ResultSet rs) throws SQLException{
         return new Group(rs.getInt("id"), rs.getString("name"), rs.getObject("created_by", Integer.class));

@@ -1,5 +1,6 @@
 package ru.bdayloop.dao;
 
+import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.db.ConnectionManager;
 
@@ -75,7 +76,7 @@ public class UserDao {
 
             int rowsAffected = ps.executeUpdate();
             if(rowsAffected == 0){
-                throw new SQLException("Пользователь с id " + user.getId()+ " не найден для обновления");
+                throw new NotFoundException("Пользователь с id " + user.getId()+ " не найден для обновления");
             }
         }
     }
@@ -89,7 +90,7 @@ public class UserDao {
 
             int rowsAffected = ps.executeUpdate();
             if(rowsAffected == 0){
-                throw new SQLException("Пользователь с id " + id +" не найден для удаления");
+                throw new NotFoundException("Пользователь с id " + id +" не найден для удаления");
             }
         }
     }
@@ -127,6 +128,20 @@ public class UserDao {
                     result.add(mapRow(rs));
                 }
                 return result;
+            }
+        }
+    }
+
+    public boolean isSubscribed(int subscriberId, int targetId) throws SQLException{
+        String sql ="SELECT 1 FROM subscriptions WHERE subscriber_id = ? AND target_id = ?";
+
+        try(Connection conn= ConnectionManager.getConnection();
+        PreparedStatement ps =conn.prepareStatement(sql)){
+            ps.setInt(1, subscriberId);
+            ps.setInt(2, targetId);
+
+            try(ResultSet rs = ps.executeQuery()){
+                return rs.next();
             }
         }
     }
