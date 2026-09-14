@@ -40,7 +40,7 @@ public class UserServlet extends HttpServlet {
             else if (pathInfo.equals("/login")){
                 LoginRequest body =JsonUtil.readBody(req, LoginRequest.class);
                 User user =userService.login(body.username(), body.password());
-                SessionUtil.login(req, user.getId());
+                SessionUtil.login(req, user.getId(), user.getRole());
                 JsonUtil.writeBody(resp, user);
             }
             else if(pathInfo.equals("/logout")){
