@@ -15,6 +15,7 @@ import ru.bdayloop.service.impl.GiftServiceImpl;
 import ru.bdayloop.service.impl.GroupServiceImpl;
 import ru.bdayloop.service.impl.MessageServiceImpl;
 import ru.bdayloop.service.impl.UserServiceImpl;
+import ru.bdayloop.web.CorsFilter;
 import ru.bdayloop.web.servlet.*;
 
 public class Application {
@@ -40,6 +41,7 @@ public class Application {
         context.addServlet(new ServletHolder(new GroupServlet(groupService)), "/groups/*");
         context.addServlet(new ServletHolder(new GiftServlet(giftService)), "/gifts/*");
         context.addServlet(new ServletHolder(new MessageServlet(messageService)), "/messages/*");
+        context.addFilter(CorsFilter.class, "/*", null);
 
         server.start();
         System.out.println("Сервер запущен на http://localhost:8080");
