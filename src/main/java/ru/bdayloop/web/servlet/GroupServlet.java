@@ -9,9 +9,9 @@ import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.service.GroupService;
 import ru.bdayloop.web.JsonUtil;
+import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.CreateGroupRequest;
 import ru.bdayloop.web.dto.UpdateGroupRequest;
-import ru.bdayloop.web.dto.UserIdRequest;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -30,23 +30,23 @@ public class GroupServlet extends HttpServlet {
         try{
             if(pathInfo ==null || pathInfo.equals("/")){
                 CreateGroupRequest body = JsonUtil.readBody(req, CreateGroupRequest.class);
-                Group newGroup = new Group(0, body.name(), body.createdBy());
+                int creatorId = SessionUtil.requireUserId(req);
+                Group newGroup = new Group(0, body.name(), creatorId);
                 Group created = groupService.create(newGroup);
                 resp.setStatus(HttpServletResponse.SC_CREATED);
                 JsonUtil.writeBody(resp, created);
             }
             else {
                 String[] parts = pathInfo.split("/");
+                int groupId = Integer.parseInt(parts[1]);
+                int userId = SessionUtil.requireUserId(req);
+
                 if (parts.length == 3 && parts[2].equals("join")){
-                    int groupId = Integer.parseInt(parts[1]);
-                    UserIdRequest body = JsonUtil.readBody(req, UserIdRequest.class);
-                    groupService.joinGroup(body.userId(), groupId);
+                    groupService.joinGroup(userId, groupId);
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 }
                 else if (parts.length ==3 && parts[2].equals("subscribe")){
-                    int groupId = Integer.parseInt(parts[1]);
-                    UserIdRequest body = JsonUtil.readBody(req, UserIdRequest.class);
-                    groupService.subscribeToGroup(body.userId(), groupId);
+                    groupService.subscribeToGroup(userId, groupId);
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 }
                 else {
@@ -113,6 +113,8 @@ public class GroupServlet extends HttpServlet {
             }
 
             int id =Integer.parseInt(pathInfo.split("/")[1]);
+            SessionUtil.requireUserId(req);
+
             Group existing = groupService.findById(id);
             UpdateGroupRequest body = JsonUtil.readBody(req, UpdateGroupRequest.class);
 
@@ -144,16 +146,16 @@ public class GroupServlet extends HttpServlet {
 
             String[] parts = pathInfo.split("/");
             int id = Integer.parseInt(parts[1]);
-            UserIdRequest body = JsonUtil.readBody(req, UserIdRequest.class);
+            int userId = SessionUtil.requireUserId(req);
 
             if (parts.length == 3 && parts[2].equals("join")){
-                groupService.leaveGroup(id, body.userId());
+                groupService.leaveGroup(id, userId);
             }
             else if (parts.length == 3 && parts[2].equals("subscribe")){
-                groupService.unsubscribeFromGroup(body.userId(), id);
+                groupService.unsubscribeFromGroup(userId, id);
             }
             else{
-                groupService.delete(id, body.userId());
+                groupService.delete(id, userId);
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

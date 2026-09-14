@@ -9,6 +9,7 @@ import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.Message;
 import ru.bdayloop.service.MessageService;
 import ru.bdayloop.web.JsonUtil;
+import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.SendMessageRequest;
 
 import java.io.IOException;
@@ -26,7 +27,8 @@ public class MessageServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             SendMessageRequest body = JsonUtil.readBody(req, SendMessageRequest.class);
-            Message newMessage = new Message(0, body.subjectId(), body.senderId(), body.text(), null);
+            int senderId = SessionUtil.requireUserId(req);
+            Message newMessage = new Message(0, body.subjectId(), senderId, body.text(), null);
             Message created = messageService.sendMessage(newMessage);
             resp.setStatus(HttpServletResponse.SC_CREATED);
             JsonUtil.writeBody(resp, created);
@@ -45,15 +47,13 @@ public class MessageServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             String subjectParam = req.getParameter("subjectId");
-            String senderParam = req.getParameter("senderId");
-
-            if(subjectParam == null || senderParam ==null){
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Нужны параметры subjectId и senderId");
+            if(subjectParam == null){
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Нужны параметры subjectId");
                 return;
             }
 
             int subjectId =Integer.parseInt(subjectParam);
-            int senderId = Integer.parseInt(senderParam);
+            int senderId = SessionUtil.requireUserId(req);
 
             List<Message> messages = messageService.getMessages(subjectId, senderId);
             JsonUtil.writeBody(resp, messages);

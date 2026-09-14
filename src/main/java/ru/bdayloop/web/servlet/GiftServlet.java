@@ -9,6 +9,7 @@ import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.Gift;
 import ru.bdayloop.service.GiftService;
 import ru.bdayloop.web.JsonUtil;
+import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.CreateGiftRequest;
 
 import java.io.IOException;
@@ -26,7 +27,9 @@ public class GiftServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try{
             CreateGiftRequest body = JsonUtil.readBody(req, CreateGiftRequest.class);
-            Gift newGift = new Gift(0, body.userId(), body.title());
+            int userId = SessionUtil.requireUserId(req);
+
+            Gift newGift = new Gift(0, userId, body.title());
             Gift created = giftService.create(newGift);
             resp.setStatus(HttpServletResponse.SC_CREATED);
             JsonUtil.writeBody(resp, created);
@@ -75,7 +78,9 @@ public class GiftServlet extends HttpServlet {
                 return;
             }
             int id =Integer.parseInt(pathInfo.split("/")[1]);
-            giftService.delete(id);
+            int requesterId = SessionUtil.requireUserId(req);
+
+            giftService.delete(id, requesterId);
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (NotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
