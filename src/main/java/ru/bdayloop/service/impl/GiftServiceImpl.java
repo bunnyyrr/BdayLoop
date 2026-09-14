@@ -1,6 +1,8 @@
 package ru.bdayloop.service.impl;
 
 import ru.bdayloop.dao.GiftDao;
+import ru.bdayloop.exception.ForbiddenException;
+import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
 import ru.bdayloop.service.GiftService;
 
@@ -19,7 +21,12 @@ public class GiftServiceImpl implements GiftService {
     }
 
     @Override
-    public void delete(int id) throws SQLException{
+    public void delete(int id, int requesterId) throws SQLException {
+        Gift gift = giftDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("Подарок с id " + id + " не найден"));
+        if (gift.getUserId() != requesterId) {
+            throw new ForbiddenException("Можно удалить только свой подарок");
+        }
         giftDao.delete(id);
     }
 
