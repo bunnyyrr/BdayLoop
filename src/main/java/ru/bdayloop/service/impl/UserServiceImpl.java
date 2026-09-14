@@ -2,6 +2,7 @@ package ru.bdayloop.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
 import ru.bdayloop.dao.UserDao;
+import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
@@ -56,13 +57,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(User user) throws SQLException{
+    public User update(User user, int requesterId) throws SQLException{
+        if(user.getId() != requesterId){
+            throw new ForbiddenException("Можно редактировать только свой профиль");
+        }
         userDao.update(user);
         return user;
     }
 
     @Override
-    public void delete(int id) throws SQLException{
+    public void delete(int id, int requesterId) throws SQLException{
+        if(id != requesterId){
+            throw new ForbiddenException("Можно удалить только свой аккаунт");
+        }
         userDao.delete(id);
     }
 
