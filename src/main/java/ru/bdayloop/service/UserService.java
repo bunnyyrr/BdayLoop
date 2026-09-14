@@ -11,8 +11,8 @@ public interface UserService {
     User findById(int id) throws SQLException;
     List<User> findByName(String name) throws SQLException;
     User findByUsername(String username) throws SQLException;
-    User update(User user) throws SQLException;
-    void delete(int id) throws SQLException;
+    User update(User user, int requesterId) throws SQLException;
+    void delete(int id, int requesterId) throws SQLException;
     void subscribe(int subscriberId, int targetId) throws SQLException;
     void unsubscribe(int subscriberId, int targetId) throws SQLException;
 }

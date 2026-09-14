@@ -9,9 +9,9 @@ import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.UserService;
 import ru.bdayloop.web.JsonUtil;
+import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.LoginRequest;
 import ru.bdayloop.web.dto.RegisterRequest;
-import ru.bdayloop.web.dto.SubscribeRequest;
 import ru.bdayloop.web.dto.UpdateUserRequest;
 
 import java.io.IOException;
@@ -40,14 +40,19 @@ public class UserServlet extends HttpServlet {
             else if (pathInfo.equals("/login")){
                 LoginRequest body =JsonUtil.readBody(req, LoginRequest.class);
                 User user =userService.login(body.username(), body.password());
+                SessionUtil.login(req, user.getId(), user.getRole());
                 JsonUtil.writeBody(resp, user);
+            }
+            else if(pathInfo.equals("/logout")){
+                SessionUtil.logout(req);
+                resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
             }
             else{
                 String[] parts =pathInfo.split("/");
                 if(parts.length ==3 && parts[2].equals("subscribe")){
                     int targetId= Integer.parseInt(parts[1]);
-                    SubscribeRequest body = JsonUtil.readBody(req, SubscribeRequest.class);
-                    userService.subscribe(body.subscriberId(), targetId);
+                    int subscriberId = SessionUtil.requireUserId(req);
+                    userService.subscribe(subscriberId, targetId);
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 } else resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -102,13 +107,14 @@ public class UserServlet extends HttpServlet {
             }
 
             int id = Integer.parseInt(pathInfo.split("/")[1]);
+            int requesterId = SessionUtil.requireUserId(req);
 
             User existing = userService.findById(id);
             UpdateUserRequest body = JsonUtil.readBody(req, UpdateUserRequest.class);
 
             User updated = new User(existing.getId(), body.name(), body.birthday(), body.username(), existing.getPasswordHash(), existing.getRole());
 
-            User result = userService.update(updated);
+            User result = userService.update(updated, requesterId);
             JsonUtil.writeBody(resp, result);
         } catch (NotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
@@ -134,13 +140,13 @@ public class UserServlet extends HttpServlet {
             }
             String[] parts =pathInfo.split("/");
             int id = Integer.parseInt((parts[1]));
+            int requesterId = SessionUtil.requireUserId(req);
 
             if(parts.length == 3 && parts[2].equals("subscribe")){
-                SubscribeRequest body = JsonUtil.readBody(req, SubscribeRequest.class);
-                userService.unsubscribe(body.subscriberId(), id);
+                userService.unsubscribe(requesterId, id);
             }
             else {
-                userService.delete(id);
+                userService.delete(id, requesterId);
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

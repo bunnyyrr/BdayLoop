@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface GiftService {
     Gift create(Gift gift) throws SQLException;
-    void delete(int id) throws SQLException;
+    void delete(int id, int requesterId) throws SQLException;
     List<Gift> findByUserId(int userId) throws SQLException;
 }
