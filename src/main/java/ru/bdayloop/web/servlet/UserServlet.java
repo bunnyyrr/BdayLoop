@@ -74,6 +74,7 @@ public class UserServlet extends HttpServlet {
         try{
             if(pathInfo==null || pathInfo.equals("/")){
                 String name = req.getParameter("name");
+                if(name==null) name="";
                 List<User> users = userService.findByName(name);
                 JsonUtil.writeBody(resp, users);
             }
