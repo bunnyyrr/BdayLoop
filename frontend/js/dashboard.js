@@ -1,5 +1,10 @@
 requireLogin();
 
+const me = requireLogin();
+if (me.role === "ADMIN") {
+    document.getElementById("adminLink").hidden = false;
+}
+
 async function loadGroups(nameFilter = "") {
     const query = nameFilter ? `?name=${encodeURIComponent(nameFilter)}` : "";
     const res = await apiFetch(`/groups${query}`);
