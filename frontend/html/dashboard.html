@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>BdayLoop — Главная</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body>
+<nav class="container">
+  <ul><li><strong>BdayLoop</strong></li></ul>
+  <ul>
+    <li><button id="logoutBtn" class="secondary">Выйти</button></li>
+  </ul>
+</nav>
+
+<main class="container">
+  <div class="grid">
+    <section>
+      <h3>Пользователи</h3>
+      <input type="search" id="searchInputUser" placeholder="Поиск пользователя..">
+      <div id="usersList">Загрузка пользователей..</div>
+    </section>
+
+    <section>
+      <h3>Группы</h3>
+      <article>
+        <form id="createGroupForm">
+          <label>Новая группа <input type="text" id="groupName" required></label>
+          <button type="submit">Создать</button>
+        </form>
+      </article>
+      <input type="search" id="searchInputGroup" placeholder="Поиск группы о названию..">
+      <div id="groupsList">Загрузка групп..</div>
+    </section>
+  </div>
+</main>
+
+<script src="api.js"></script>
+<script src="dashboard.js"></script>
+</body>
+</html>

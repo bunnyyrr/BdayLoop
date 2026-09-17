@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>BdayLoop — Профиль</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body>
+<nav class="container">
+  <ul><li><a href="dashboard.html">← Назад</a></li></ul>
+  <ul>
+    <li><button id="logoutBtn" class="secondary">Выйти</button></li>
+  </ul>
+</nav>
+
+<main class="container">
+  <hgroup>
+    <h2 id="userName">Имя</h2>
+    <p>@<span id="userUsername"></span>id <span id="userId"></span></p>
+  </hgroup>
+  <p>Дата рождения: <span id="userBirthday"></span></p>
+  <p>Группы: <span id="userGroups"></span></p>
+
+  <div id="ownerActions" hidden>
+    <article>
+      <h3>Редактировать профиль</h3>
+      <form id="editForm">
+        <label>Имя <input type="text" id="editName"></label>
+        <label>Дата рождения <input type="date" id="editBirthday"></label>
+        <label>Username <input type="text" id="editUsername"></label>
+        <button type="submit">Сохранить</button>
+      </form>
+    </article>
+    <article>
+      <h3>Добавить подарок</h3>
+      <form id="addGiftForm">
+        <label>Новый подарок <input type="text" id="giftTitle" required></label>
+        <button type="submit">Добавить</button>
+      </form>
+    </article>
+  </div>
+
+  <div id="otherActions" hidden>
+    <button id="subscribeBtn">Подписаться</button>
+    <button id="unsubscribeBtn" class="secondary">Отписаться</button>
+    <a role="button" id="chatLink" href="#">Перейти в чат</a>
+  </div>
+
+  <article>
+    <h3>Подарки</h3>
+    <ul id="giftsList"></ul>
+  </article>
+</main>
+
+<script src="api.js"></script>
+<script src="user.js"></script>
+</body>
+</html>
