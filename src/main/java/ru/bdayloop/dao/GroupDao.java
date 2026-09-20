@@ -154,6 +154,21 @@ public class GroupDao {
         }
     }
 
+    public List<Group> findByMember(int userId) throws SQLException {
+        String sql = "SELECT g.id, g.name, g.created_by FROM groups g JOIN group_members gm ON gm.group_id=g.id WHERE gm.user_id =?";
+        try (Connection conn = ConnectionManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try(ResultSet rs = ps.executeQuery()) {
+                List<Group> result = new ArrayList<>();
+                while (rs.next()){
+                    result.add(mapRow(rs));
+                }
+                return result;
+            }
+        }
+    }
+
     private Group mapRow(ResultSet rs) throws SQLException{
         return new Group(rs.getInt("id"), rs.getString("name"), rs.getObject("created_by", Integer.class));
     }

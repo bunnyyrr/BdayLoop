@@ -79,4 +79,9 @@ public class GroupServiceImpl implements GroupService {
     public void update(Group group) throws SQLException{
         groupDao.update(group);
     }
+
+    @Override
+    public List<Group> findByMember(int userId) throws SQLException{
+        return groupDao.findByMember(userId);
+    }
 }

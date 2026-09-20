@@ -73,7 +73,17 @@ public class GroupServlet extends HttpServlet {
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
                 String name= req.getParameter("name");
-                List<Group> groups = (name == null) ? groupService.findAll() : groupService.findByName(name);
+                String memberIdParam = req.getParameter("memberId");
+                List<Group> groups;
+                if (memberIdParam != null) {
+                    groups = groupService.findByMember(Integer.parseInt(memberIdParam));
+                }
+                else if (name != null) {
+                    groups = groupService.findByName(name);
+                }
+                else {
+                    groups = groupService.findAll();
+                }
                 JsonUtil.writeBody(resp, groups);
             }
             else {
