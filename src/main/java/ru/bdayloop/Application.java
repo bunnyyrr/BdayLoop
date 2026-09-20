@@ -7,6 +7,10 @@ import ru.bdayloop.dao.GiftDao;
 import ru.bdayloop.dao.GroupDao;
 import ru.bdayloop.dao.MessageDao;
 import ru.bdayloop.dao.UserDao;
+import ru.bdayloop.dao.impl.GiftDaoImpl;
+import ru.bdayloop.dao.impl.GroupDaoImpl;
+import ru.bdayloop.dao.impl.MessageDaoImpl;
+import ru.bdayloop.dao.impl.UserDaoImpl;
 import ru.bdayloop.service.GiftService;
 import ru.bdayloop.service.GroupService;
 import ru.bdayloop.service.MessageService;
@@ -20,10 +24,10 @@ import ru.bdayloop.web.servlet.*;
 
 public class Application {
     public static void main(String[] args) throws Exception {
-        UserDao userDao = new UserDao();
-        GroupDao groupDao = new GroupDao();
-        GiftDao giftDao = new GiftDao();
-        MessageDao messageDao = new MessageDao();
+        UserDao userDao = new UserDaoImpl();
+        GroupDao groupDao = new GroupDaoImpl();
+        GiftDao giftDao = new GiftDaoImpl();
+        MessageDao messageDao = new MessageDaoImpl();
 
         UserService userService = new UserServiceImpl(userDao);
         GroupService groupService= new GroupServiceImpl(groupDao);
