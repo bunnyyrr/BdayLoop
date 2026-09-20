@@ -10,12 +10,15 @@ import ru.bdayloop.model.User;
 import ru.bdayloop.service.UserService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
+import ru.bdayloop.web.dto.ImportUserRequest;
 import ru.bdayloop.web.dto.LoginRequest;
 import ru.bdayloop.web.dto.RegisterRequest;
 import ru.bdayloop.web.dto.UpdateUserRequest;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class UserServlet extends HttpServlet {
@@ -46,6 +49,13 @@ public class UserServlet extends HttpServlet {
             else if(pathInfo.equals("/logout")){
                 SessionUtil.logout(req);
                 resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            }
+            else if (pathInfo.equals("/import")) {
+            SessionUtil.requireAdmin(req);
+            ImportUserRequest[] body = JsonUtil.readBody(req, ImportUserRequest[].class);
+            List<User> created = userService.importUsers(Arrays.asList(body));
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+            JsonUtil.writeBody(resp, created);
             }
             else{
                 String[] parts =pathInfo.split("/");

@@ -7,8 +7,10 @@ import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.UserService;
+import ru.bdayloop.web.dto.ImportUserRequest;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,5 +83,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void unsubscribe(int subscriberId, int targetId) throws SQLException{
         userDao.unsubscribe(subscriberId, targetId);
+    }
+
+    @Override
+    public List<User> importUsers(List<ImportUserRequest> requests) throws SQLException{
+        List<User> created = new ArrayList<>();
+        for(ImportUserRequest r : requests) {
+            User.Role role = r.role() != null ? User.Role.valueOf(r.role()) : User.Role.USER;
+            User newUser= new User(0, r.name(), r.birthday(), r.username(), null, role);
+            created.add(register(newUser, r.password()));
+        }
+        return created;
     }
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>BdayLoop - Админ</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body>
+<nav class="container">
+  <ul><li><a href="dashboard.html">← Назад</a></li></ul>
+  <ul>
+    <li><button id="logoutBtn" class="secondary">Выйти</button></li>
+  </ul>
+</nav>
+
+<main class="container">
+  <h2>Массовый импорт пользователей</h2>
+  <p>Вставь JSON-массив: <code>[{"name": "...", "birthday": "ГГГГ-ММ-ДД", "username": "...", "password": "...", "role": "USER"}]</code> (<code>role</code> необязателен)</p>
+
+  <form id="importForm">
+    <textarea id="importJson" rows="10" required></textarea>
+    <button type="submit">Импортировать</button>
+  </form>
+
+  <div id="importResult"></div>
+</main>
+
+<script src="../js/api.js"></script>
+<script src="../js/admin.js"></script>
+</body>
+</html>
