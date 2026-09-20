@@ -28,6 +28,14 @@ async function loadProfile() {
     }
 }
 
+async function loadUserGroups() {
+    const res = await apiFetch(`/groups?memberId=${profileId}`);
+    const groups = await res.json();
+    document.getElementById("userGroups").textContent = groups.length
+        ? groups.map(g => g.name).join(", ")
+        : "нет групп";
+}
+
 async function loadGifts() {
     const res = await apiFetch(`/gifts?userId=${profileId}`);
     const gifts = await res.json();
@@ -84,3 +92,4 @@ document.getElementById("unsubscribeBtn")?.addEventListener("click", async () =>
 
 loadProfile();
 loadGifts();
+loadUserGroups();

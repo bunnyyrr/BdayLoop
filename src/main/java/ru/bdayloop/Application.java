@@ -36,7 +36,6 @@ public class Application {
         context.setContextPath("/");
         server.setHandler(context);
 
-        context.addServlet(new ServletHolder(new HelloServlet()), "/hello");
         context.addServlet(new ServletHolder(new UserServlet(userService)), "/users/*");
         context.addServlet(new ServletHolder(new GroupServlet(groupService)), "/groups/*");
         context.addServlet(new ServletHolder(new GiftServlet(giftService)), "/gifts/*");

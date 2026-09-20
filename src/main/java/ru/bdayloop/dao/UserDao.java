@@ -4,7 +4,6 @@ import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.db.ConnectionManager;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -116,11 +115,13 @@ public class UserDao {
     }
 
     public List<User> findByName(String name) throws SQLException{
-        String sql = "SELECT id, name, birthday, username, password_hash, role FROM users WHERE name ILIKE ?";
+        String sql = "SELECT id, name, birthday, username, password_hash, role FROM users WHERE name ILIKE ? OR username ILIKE ? OR CAST(id AS TEXT) ILIKE ?";
 
         try(Connection conn = ConnectionManager.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%"+ name +"%");
+            ps.setString(2, "%"+ name +"%");
+            ps.setString(3, "%"+ name +"%");
 
             try(ResultSet rs = ps.executeQuery()){
                 List<User> result = new ArrayList<>();

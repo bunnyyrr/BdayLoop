@@ -17,4 +17,5 @@ public interface GroupService {
     void leaveGroup(int groupId, int userId) throws SQLException;
     void unsubscribeFromGroup(int subscriberId, int groupId) throws SQLException;
     void update(Group group) throws SQLException;
+    List<Group> findByMember(int userId) throws SQLException;
 }
