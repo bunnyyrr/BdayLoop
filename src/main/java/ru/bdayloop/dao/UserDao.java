@@ -4,7 +4,6 @@ import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.db.ConnectionManager;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
