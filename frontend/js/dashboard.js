@@ -1,5 +1,3 @@
-requireLogin();
-
 const me = requireLogin();
 document.getElementById("myProfileLink").href = `user.html?id=${me.id}`;
 
