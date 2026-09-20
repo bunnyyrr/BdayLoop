@@ -1,6 +1,8 @@
 requireLogin();
 
 const me = requireLogin();
+document.getElementById("myProfileLink").href = `user.html?id=${me.id}`;
+
 if (me.role === "ADMIN") {
     document.getElementById("adminLink").hidden = false;
 }
