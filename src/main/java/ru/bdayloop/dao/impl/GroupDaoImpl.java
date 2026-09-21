@@ -20,7 +20,7 @@ public class GroupDaoImpl implements GroupDao {
         try(Connection conn = ConnectionManager.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, group.getName());
-            ps.setInt(2, group.getCreatedBy());
+            ps.setObject(2, group.getCreatedBy());
 
             try(ResultSet rs = ps.executeQuery()){
                 if(rs.next()){
