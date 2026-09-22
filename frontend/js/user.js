@@ -90,6 +90,17 @@ document.getElementById("unsubscribeBtn")?.addEventListener("click", async () =>
     alert(res.ok ? "Вы отписались" : await res.text());
 });
 
+document.getElementById("deleteAccountBtn")?.addEventListener("click", async () => {
+    if (!confirm("Удалить аккаунт без возможности восстановления?")) return;
+    const res = await apiFetch(`/users/${profileId}`, { method: "DELETE" });
+    if (res.ok) {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+    } else {
+        alert(await res.text());
+    }
+});
+
 loadProfile();
 loadGifts();
 loadUserGroups();
