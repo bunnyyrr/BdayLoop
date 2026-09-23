@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>BdayLoop — Группа</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+</head>
+<body>
+<nav class="container">
+    <ul><li><a href="dashboard.html">← Назад</a></li></ul>
+    <ul>
+        <li><button id="logoutBtn" class="secondary">Выйти</button></li>
+    </ul>
+</nav>
+
+<main class="container">
+    <hgroup>
+        <h2 id="groupName">Группа</h2>
+    </hgroup>
+
+    <article id="renameBox" hidden>
+        <h3>Переименовать группу</h3>
+        <form id="renameForm">
+            <label>Новое название <input type="text" id="renameInput" required></label>
+            <button type="submit">Сохранить</button>
+        </form>
+    </article>
+
+    <div>
+        <button id="joinBtn" hidden>Вступить</button>
+        <button id="leaveBtn" class="secondary" hidden>Покинуть группу</button>
+        <button id="subscribeGroupBtn" class="secondary">Подписаться на группу</button>
+        <button id="unsubscribeGroupBtn" class="secondary">Отписаться от группы</button>
+        <button id="subscribeAllBtn" class="secondary">Подписаться на участников</button>
+        <button id="unsubscribeAllBtn" class="secondary">Отписаться от всех участников</button>
+        <button id="deleteGroupBtn" class="secondary" hidden>Удалить группу</button>
+    </div>
+
+    <article>
+        <h3>Участники</h3>
+        <ul id="membersList"></ul>
+    </article>
+</main>
+
+<script src="../js/api.js"></script>
+<script src="../js/group.js"></script>
+</body>
+</html>
