@@ -16,24 +16,10 @@ function renderGroups(groups) {
     el.innerHTML = groups.length ? groups.map(g => `
         <article>
             <strong>${g.name}</strong>
-            <button data-id="${g.id}" class="join-btn">Вступить</button>
-            <button data-id="${g.id}" class="subscribe-group-btn secondary">Подписаться</button>
+            <a role="button" href="group.html?id=${g.id}">Посмотреть группу</a>
         </article>
     `).join("") : "Групп пока нет.";
 }
-
-document.getElementById("groupsList").addEventListener("click", async (e) => {
-    const id = e.target.dataset.id;
-    if (!id) return;
-
-    if (e.target.classList.contains("join-btn")) {
-        const res = await apiFetch(`/groups/${id}/join`, { method: "POST" });
-        alert(res.ok ? "Вы вступили в группу" : await res.text());
-    } else if (e.target.classList.contains("subscribe-group-btn")) {
-        const res = await apiFetch(`/groups/${id}/subscribe`, { method: "POST" });
-        alert(res.ok ? "Вы подписались на группу" : await res.text());
-    }
-});
 
 document.getElementById("createGroupForm").addEventListener("submit", async (e) => {
     e.preventDefault();

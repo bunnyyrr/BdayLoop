@@ -31,8 +31,8 @@ async function loadProfile() {
 async function loadUserGroups() {
     const res = await apiFetch(`/groups?memberId=${profileId}`);
     const groups = await res.json();
-    document.getElementById("userGroups").textContent = groups.length
-        ? groups.map(g => g.name).join(", ")
+    document.getElementById("userGroups").innerHTML = groups.length
+        ? groups.map(g => `<a href="group.html?id=${g.id}">${g.name}</a>`).join(", ")
         : "нет групп";
 }
 
@@ -88,6 +88,17 @@ document.getElementById("subscribeBtn")?.addEventListener("click", async () => {
 document.getElementById("unsubscribeBtn")?.addEventListener("click", async () => {
     const res = await apiFetch(`/users/${profileId}/subscribe`, { method: "DELETE" });
     alert(res.ok ? "Вы отписались" : await res.text());
+});
+
+document.getElementById("deleteAccountBtn")?.addEventListener("click", async () => {
+    if (!confirm("Удалить аккаунт без возможности восстановления?")) return;
+    const res = await apiFetch(`/users/${profileId}`, { method: "DELETE" });
+    if (res.ok) {
+        localStorage.removeItem("currentUser");
+        window.location.href = "login.html";
+    } else {
+        alert(await res.text());
+    }
 });
 
 loadProfile();
