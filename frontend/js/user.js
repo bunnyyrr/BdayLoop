@@ -31,8 +31,8 @@ async function loadProfile() {
 async function loadUserGroups() {
     const res = await apiFetch(`/groups?memberId=${profileId}`);
     const groups = await res.json();
-    document.getElementById("userGroups").textContent = groups.length
-        ? groups.map(g => g.name).join(", ")
+    document.getElementById("userGroups").innerHTML = groups.length
+        ? groups.map(g => `<a href="group.html?id=${g.id}">${g.name}</a>`).join(", ")
         : "нет групп";
 }
 
