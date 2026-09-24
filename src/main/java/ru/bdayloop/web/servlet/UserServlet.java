@@ -10,10 +10,7 @@ import ru.bdayloop.model.User;
 import ru.bdayloop.service.UserService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
-import ru.bdayloop.web.dto.ImportUserRequest;
-import ru.bdayloop.web.dto.LoginRequest;
-import ru.bdayloop.web.dto.RegisterRequest;
-import ru.bdayloop.web.dto.UpdateUserRequest;
+import ru.bdayloop.web.dto.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -37,13 +34,13 @@ public class UserServlet extends HttpServlet {
                 User newUser = new User(0, body.name(), body.birthday(), body.username(), null, User.Role.USER);
                 User created = userService.register(newUser, body.password());
                 resp.setStatus(HttpServletResponse.SC_CREATED);
-                JsonUtil.writeBody(resp, created);
+                JsonUtil.writeBody(resp, UserResponse.from(created));
             }
             else if (pathInfo.equals("/login")){
                 LoginRequest body =JsonUtil.readBody(req, LoginRequest.class);
                 User user =userService.login(body.username(), body.password());
                 SessionUtil.login(req, user.getId(), user.getRole());
-                JsonUtil.writeBody(resp, user);
+                JsonUtil.writeBody(resp, UserResponse.from(user));
             }
             else if(pathInfo.equals("/logout")){
                 SessionUtil.logout(req);
@@ -54,7 +51,7 @@ public class UserServlet extends HttpServlet {
             ImportUserRequest[] body = JsonUtil.readBody(req, ImportUserRequest[].class);
             List<User> created = userService.importUsers(Arrays.asList(body));
             resp.setStatus(HttpServletResponse.SC_CREATED);
-            JsonUtil.writeBody(resp, created);
+            JsonUtil.writeBody(resp, created.stream().map(u -> UserResponse.from(u)).toList());
             }
             else{
                 String[] parts =pathInfo.split("/");
@@ -81,17 +78,17 @@ public class UserServlet extends HttpServlet {
         String pathInfo =req.getPathInfo();
 
         try{
+            SessionUtil.requireUserId(req);
             if(pathInfo==null || pathInfo.equals("/")){
                 String name = req.getParameter("name");
                 if(name==null) name="";
                 List<User> users = userService.findByName(name);
-                JsonUtil.writeBody(resp, users);
-            }
+                JsonUtil.writeBody(resp, users.stream().map(u -> UserResponse.from(u)).toList());            }
             else {
                 String[] parts = pathInfo.split("/");
                 int id =Integer.parseInt(parts[1]);
                 User user =userService.findById(id);
-                JsonUtil.writeBody(resp, user);
+                JsonUtil.writeBody(resp, UserResponse.from(user));
             }
         } catch (NotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
@@ -125,7 +122,7 @@ public class UserServlet extends HttpServlet {
             User updated = new User(existing.getId(), body.name(), body.birthday(), body.username(), existing.getPasswordHash(), existing.getRole());
 
             User result = userService.update(updated, requesterId);
-            JsonUtil.writeBody(resp, result);
+            JsonUtil.writeBody(resp, UserResponse.from(result));
         } catch (NotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
         } catch (ForbiddenException e) {
