@@ -20,7 +20,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Message sendMessage(Message message) throws SQLException{
         if(message.getSenderId()==message.getSubjectUserId()) throw new ForbiddenException("Нельзя обсуждать свой же подарок");
-        if(!userDao.isSubscribed(message.getSenderId(), message.getSubjectUserId())) throw new ForbiddenException("Нет доступа к чату - сначала подпишитесь на именинника");
+        if(!userDao.isSubscribedDirectlyOrViaGroup(message.getSenderId(), message.getSubjectUserId())) throw new ForbiddenException("Нет доступа к чату - сначала подпишитесь на именинника или на группу, в которой он состоит");
 
         return messageDao.create(message);
     }
@@ -28,7 +28,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public List<Message> getMessages(int subjectUserId, int senderId) throws SQLException{
         if(subjectUserId==senderId) throw new ForbiddenException("Нельзя видеть чат про свой же подарок");
-        if(!userDao.isSubscribed(senderId, subjectUserId)) throw new ForbiddenException("Нет доступа к чату - сначала подпишитесь на именинника");
+        if(!userDao.isSubscribedDirectlyOrViaGroup(senderId, subjectUserId)) throw new ForbiddenException("Нет доступа к чату - сначала подпишитесь на именинника или на группу, в которой он состоит");
 
         return messageDao.findBySubjectUserId(subjectUserId);
     }

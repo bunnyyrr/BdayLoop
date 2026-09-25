@@ -134,16 +134,27 @@ public class UserDaoImpl implements UserDao {
         }
     }
 
-    public boolean isSubscribed(int subscriberId, int targetId) throws SQLException{
-        String sql ="SELECT 1 FROM subscriptions WHERE subscriber_id = ? AND target_id = ?";
+    public boolean isSubscribedDirectlyOrViaGroup(int subscriberId, int targetId) throws SQLException{
+        String sql = """
+            SELECT EXISTS (
+                SELECT 1 FROM subscriptions WHERE subscriber_id = ? AND target_id = ?
+            ) OR EXISTS (
+                SELECT 1 FROM group_subscriptions gs
+                JOIN group_members gm ON gm.group_id = gs.group_id
+                WHERE gs.subscriber_id = ? AND gm.user_id = ?
+            )
+            """;
 
         try(Connection conn= ConnectionManager.getConnection();
         PreparedStatement ps =conn.prepareStatement(sql)){
             ps.setInt(1, subscriberId);
             ps.setInt(2, targetId);
+            ps.setInt(3, subscriberId);
+            ps.setInt(4, targetId);
 
             try(ResultSet rs = ps.executeQuery()){
-                return rs.next();
+                rs.next();
+                return rs.getBoolean(1);
             }
         }
     }
