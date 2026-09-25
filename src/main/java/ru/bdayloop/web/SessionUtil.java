@@ -39,4 +39,10 @@ public class SessionUtil {
             throw new ForbiddenException("Требуются права администратора");
         }
     }
+
+    public static User.Role currentRole(HttpServletRequest req){
+        requireUserId(req);
+        String role =(String) req.getSession(false).getAttribute(ROLE_KEY);
+        return User.Role.valueOf(role);
+    }
 }

@@ -7,6 +7,7 @@ import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.Group;
+import ru.bdayloop.model.User;
 import ru.bdayloop.service.GroupService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
@@ -123,13 +124,11 @@ public class GroupServlet extends HttpServlet {
             }
 
             int id =Integer.parseInt(pathInfo.split("/")[1]);
-            SessionUtil.requireUserId(req);
-
-            Group existing = groupService.findById(id);
+            int requesterId = SessionUtil.requireUserId(req);
+            User.Role role = SessionUtil.currentRole(req);
             UpdateGroupRequest body = JsonUtil.readBody(req, UpdateGroupRequest.class);
 
-            Group updated = new Group(existing.getId(), body.name(), existing.getCreatedBy());
-            groupService.update(updated);
+            Group updated =groupService.update(id, body.name(), requesterId, role);
             JsonUtil.writeBody(resp, updated);
         } catch (NotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
@@ -165,7 +164,7 @@ public class GroupServlet extends HttpServlet {
                 groupService.unsubscribeFromGroup(userId, id);
             }
             else{
-                groupService.delete(id, userId);
+                groupService.delete(id, userId, SessionUtil.currentRole(req));
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
