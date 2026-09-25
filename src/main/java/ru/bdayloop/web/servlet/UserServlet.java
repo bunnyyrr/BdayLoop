@@ -83,7 +83,8 @@ public class UserServlet extends HttpServlet {
                 String name = req.getParameter("name");
                 if(name==null) name="";
                 List<User> users = userService.findByName(name);
-                JsonUtil.writeBody(resp, users.stream().map(u -> UserResponse.from(u)).toList());            }
+                JsonUtil.writeBody(resp, users.stream().map(u -> UserResponse.from(u)).toList());
+            }
             else {
                 String[] parts = pathInfo.split("/");
                 int id =Integer.parseInt(parts[1]);
