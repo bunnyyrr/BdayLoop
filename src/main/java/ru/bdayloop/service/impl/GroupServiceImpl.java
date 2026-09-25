@@ -4,6 +4,7 @@ import ru.bdayloop.dao.GroupDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;
+import ru.bdayloop.model.User;
 import ru.bdayloop.service.GroupService;
 
 import java.sql.SQLException;
@@ -17,16 +18,8 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void delete(int groupId, int requesterId) throws SQLException{
-        Optional<Group> group = groupDao.findById(groupId);
-
-        if(group.isEmpty()){
-            throw new NotFoundException(("Группа с id "+ groupId + " не найдена"));
-        }
-        Integer createdBy = group.get().getCreatedBy();
-        if(createdBy == null || createdBy != requesterId){
-            throw new ForbiddenException(("Только создатель может удалить группу"));
-        }
+    public void delete(int groupId, int requesterId, User.Role requesterRole) throws SQLException{
+        permissionCheck(groupId, requesterId, requesterRole);
         groupDao.delete(groupId);
     }
 
@@ -76,12 +69,24 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void update(Group group) throws SQLException{
-        groupDao.update(group);
+    public Group update(int groupId, String newName, int requesterId, User.Role requesterRole) throws SQLException{
+        Group group = permissionCheck(groupId, requesterId, requesterRole);
+        Group updated = new Group(group.getId(), newName, group.getCreatedBy());
+        groupDao.update(updated);
+        return updated;
     }
 
     @Override
     public List<Group> findByMember(int userId) throws SQLException{
         return groupDao.findByMember(userId);
+    }
+
+    private Group permissionCheck(int groupId, int requesterId, User.Role requesterRole) throws SQLException{
+        Group group = findById(groupId);
+        boolean isCreator = group.getCreatedBy() != null && group.getCreatedBy() == requesterId;
+        if(!isCreator && requesterRole!=User.Role.ADMIN){
+            throw new ForbiddenException("Управлять группой может только её создатель или администратор");
+        }
+        return group;
     }
 }

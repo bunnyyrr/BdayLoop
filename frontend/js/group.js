@@ -12,9 +12,9 @@ async function loadGroup() {
     document.getElementById("groupName").textContent = group.name;
     document.getElementById("renameInput").value = group.name;
 
-    const isCreator = group.createdBy === me.id;
-    document.getElementById("renameBox").hidden = !isCreator;
-    document.getElementById("deleteGroupBtn").hidden = !isCreator;
+    const canManage = group.createdBy === me.id || me.role === "ADMIN";
+    document.getElementById("renameBox").hidden = !canManage;
+    document.getElementById("deleteGroupBtn").hidden = !canManage;
 }
 
 async function loadMembers() {
