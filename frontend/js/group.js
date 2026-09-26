@@ -79,23 +79,5 @@ document.getElementById("deleteGroupBtn").addEventListener("click", async () => 
     }
 });
 
-document.getElementById("subscribeAllBtn").addEventListener("click", async () => {
-    const res = await apiFetch(`/groups/${groupId}/members`);
-    const memberIds = await res.json();
-    await Promise.all(
-        memberIds.filter(id => id !== me.id).map(id => apiFetch(`/users/${id}/subscribe`, { method: "POST" }))
-    );
-    alert("Подписка на участников обновлена");
-});
-
-document.getElementById("unsubscribeAllBtn").addEventListener("click", async () => {
-    const res = await apiFetch(`/groups/${groupId}/members`);
-    const memberIds = await res.json();
-    await Promise.all(
-        memberIds.filter(id => id !== me.id).map(id => apiFetch(`/users/${id}/subscribe`, { method: "DELETE" }))
-    );
-    alert("Подписки на участников удалены");
-});
-
 loadGroup();
 loadMembers();
