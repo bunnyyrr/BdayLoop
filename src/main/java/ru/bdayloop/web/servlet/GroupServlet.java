@@ -75,8 +75,13 @@ public class GroupServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 String name= req.getParameter("name");
                 String memberIdParam = req.getParameter("memberId");
+                String subscribedParam = req.getParameter("subscribed");
                 List<Group> groups;
-                if (memberIdParam != null) {
+                if("true".equals(subscribedParam)){
+                    int userId =SessionUtil.requireUserId(req);
+                    groups =groupService.findBySubscriber(userId);
+                }
+                else if (memberIdParam != null) {
                     groups = groupService.findByMember(Integer.parseInt(memberIdParam));
                 }
                 else if (name != null) {

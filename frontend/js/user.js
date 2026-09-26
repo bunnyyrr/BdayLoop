@@ -36,6 +36,45 @@ async function loadUserGroups() {
         : "нет групп";
 }
 
+async function loadSubscriptionStatus() {
+    if (isOwnProfile) return;
+
+    const [directRes, profileGroupsRes, myGroupsRes] = await Promise.all([
+        apiFetch(`/users/${profileId}/subscribe`),
+        apiFetch(`/groups?memberId=${profileId}`),
+        apiFetch("/groups?subscribed=true")
+    ]);
+    if (!directRes.ok || !profileGroupsRes.ok || !myGroupsRes.ok) return;
+
+    const direct = (await directRes.json()).subscribed;
+    const profileGroups = await profileGroupsRes.json();
+    const myGroupIds = (await myGroupsRes.json()).map(g => g.id);
+    const viaGroups = profileGroups.filter(g => myGroupIds.includes(g.id));
+
+    const groupLinks = viaGroups
+        .map(g => `<a href="group.html?id=${g.id}">«${g.name}»</a>`)
+        .join(", ");
+    const viaText = viaGroups.length === 1 ? "через группу" : "через группы";
+    const chatHint = viaGroups.length === 1
+        ? "Чат доступен, пока вы подписаны на группу"
+        : "Чат доступен, пока вы подписаны хотя бы на одну из них";
+
+    let status = "";
+    if (direct && viaGroups.length > 0) {
+        status = `✓ Вы подписаны, а также ${viaText} ${groupLinks}`;
+    } else if (direct) {
+        status = "✓ Вы подписаны";
+    } else if (viaGroups.length > 0) {
+        status = `✓ Подписаны ${viaText} ${groupLinks} · ${chatHint}`;
+    }
+    document.getElementById("subStatus").innerHTML = status;
+
+    const isSubscribed = direct || viaGroups.length > 0;
+    document.getElementById("subscribeBtn").hidden = isSubscribed;
+    document.getElementById("unsubscribeBtn").hidden = !direct;
+    document.getElementById("chatLink").hidden = !isSubscribed;
+}
+
 async function loadGifts() {
     const res = await apiFetch(`/gifts?userId=${profileId}`);
     const gifts = await res.json();
@@ -82,12 +121,14 @@ document.getElementById("giftsList").addEventListener("click", async (e) => {
 
 document.getElementById("subscribeBtn")?.addEventListener("click", async () => {
     const res = await apiFetch(`/users/${profileId}/subscribe`, { method: "POST" });
-    alert(res.ok ? "Вы подписались" : await res.text());
+    if (res.ok) loadSubscriptionStatus();
+    else alert(await res.text());
 });
 
 document.getElementById("unsubscribeBtn")?.addEventListener("click", async () => {
     const res = await apiFetch(`/users/${profileId}/subscribe`, { method: "DELETE" });
-    alert(res.ok ? "Вы отписались" : await res.text());
+    if (res.ok) loadSubscriptionStatus();
+    else alert(await res.text());
 });
 
 document.getElementById("deleteAccountBtn")?.addEventListener("click", async () => {
@@ -104,3 +145,4 @@ document.getElementById("deleteAccountBtn")?.addEventListener("click", async () 
 loadProfile();
 loadGifts();
 loadUserGroups();
+loadSubscriptionStatus();

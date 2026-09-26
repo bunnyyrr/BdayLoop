@@ -19,4 +19,5 @@ public interface GroupDao {
     void unsubscribeFromGroup(int subscriberId, int groupId) throws SQLException;
     void update(Group group) throws SQLException;
     List<Group> findByMember(int userId) throws SQLException;
+    List<Group> findBySubscriber(int subscriberId) throws SQLException;
 }

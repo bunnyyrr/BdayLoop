@@ -95,4 +95,9 @@ public class UserServiceImpl implements UserService {
         }
         return created;
     }
+
+    @Override
+    public boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException{
+        return userDao.isSubscribedDirectly(subscriberId, targetId);
+    }
 }

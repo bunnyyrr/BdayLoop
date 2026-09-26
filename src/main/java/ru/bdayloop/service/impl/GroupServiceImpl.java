@@ -81,6 +81,11 @@ public class GroupServiceImpl implements GroupService {
         return groupDao.findByMember(userId);
     }
 
+    @Override
+    public List<Group> findBySubscriber(int subscriberId) throws SQLException{
+        return groupDao.findBySubscriber(subscriberId);
+    }
+
     private Group permissionCheck(int groupId, int requesterId, User.Role requesterRole) throws SQLException{
         Group group = findById(groupId);
         boolean isCreator = group.getCreatedBy() != null && group.getCreatedBy() == requesterId;

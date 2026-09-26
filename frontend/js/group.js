@@ -35,6 +35,17 @@ async function loadMembers() {
         : "<li>Участников пока нет.</li>";
 }
 
+async function loadSubscriptionStatus() {
+    const res = await apiFetch("/groups?subscribed=true");
+    if (!res.ok) return;
+    const myGroups = await res.json();
+    const isSubscribed = myGroups.some(g => g.id === groupId);
+
+    document.getElementById("groupSubStatus").hidden = !isSubscribed;
+    document.getElementById("subscribeGroupBtn").hidden = isSubscribed;
+    document.getElementById("unsubscribeGroupBtn").hidden = !isSubscribed;
+}
+
 document.getElementById("joinBtn").addEventListener("click", async () => {
     const res = await apiFetch(`/groups/${groupId}/join`, { method: "POST" });
     if (res.ok) loadMembers();
@@ -49,13 +60,14 @@ document.getElementById("leaveBtn").addEventListener("click", async () => {
 
 document.getElementById("subscribeGroupBtn").addEventListener("click", async () => {
     const res = await apiFetch(`/groups/${groupId}/subscribe`, { method: "POST" });
-    if (res.ok) alert("Вы подписались на группу");
-    else alert("Не удалось подписаться — возможно, вы уже подписаны на эту группу");
+    if (res.ok) loadSubscriptionStatus();
+    else alert(await res.text());
 });
 
 document.getElementById("unsubscribeGroupBtn").addEventListener("click", async () => {
     const res = await apiFetch(`/groups/${groupId}/subscribe`, { method: "DELETE" });
-    alert(res.ok ? "Вы отписались от группы" : await res.text());
+    if (res.ok) loadSubscriptionStatus();
+    else alert(await res.text());
 });
 
 document.getElementById("renameForm").addEventListener("submit", async (e) => {
@@ -79,23 +91,6 @@ document.getElementById("deleteGroupBtn").addEventListener("click", async () => 
     }
 });
 
-document.getElementById("subscribeAllBtn").addEventListener("click", async () => {
-    const res = await apiFetch(`/groups/${groupId}/members`);
-    const memberIds = await res.json();
-    await Promise.all(
-        memberIds.filter(id => id !== me.id).map(id => apiFetch(`/users/${id}/subscribe`, { method: "POST" }))
-    );
-    alert("Подписка на участников обновлена");
-});
-
-document.getElementById("unsubscribeAllBtn").addEventListener("click", async () => {
-    const res = await apiFetch(`/groups/${groupId}/members`);
-    const memberIds = await res.json();
-    await Promise.all(
-        memberIds.filter(id => id !== me.id).map(id => apiFetch(`/users/${id}/subscribe`, { method: "DELETE" }))
-    );
-    alert("Подписки на участников удалены");
-});
-
 loadGroup();
 loadMembers();
+loadSubscriptionStatus();
