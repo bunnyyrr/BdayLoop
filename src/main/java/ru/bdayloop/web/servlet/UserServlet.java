@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class UserServlet extends HttpServlet {
     private final UserService userService;
@@ -78,7 +79,7 @@ public class UserServlet extends HttpServlet {
         String pathInfo =req.getPathInfo();
 
         try{
-            SessionUtil.requireUserId(req);
+            int requesterId = SessionUtil.requireUserId(req);
             if(pathInfo==null || pathInfo.equals("/")){
                 String name = req.getParameter("name");
                 if(name==null) name="";
@@ -88,8 +89,15 @@ public class UserServlet extends HttpServlet {
             else {
                 String[] parts = pathInfo.split("/");
                 int id =Integer.parseInt(parts[1]);
-                User user =userService.findById(id);
-                JsonUtil.writeBody(resp, UserResponse.from(user));
+
+                if(parts.length == 3 && parts[2].equals("subscribe")){
+                    boolean subscribed = userService.isSubscribedDirectly(requesterId, id);
+                    JsonUtil.writeBody(resp, new SubscriptionStatusResponse(subscribed));
+                }
+                else {
+                    User user = userService.findById(id);
+                    JsonUtil.writeBody(resp, UserResponse.from(user));
+                }
             }
         } catch (NotFoundException e) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());

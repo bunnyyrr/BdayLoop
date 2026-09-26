@@ -17,4 +17,5 @@ public interface UserService {
     void subscribe(int subscriberId, int targetId) throws SQLException;
     void unsubscribe(int subscriberId, int targetId) throws SQLException;
     List<User> importUsers(List<ImportUserRequest> requests) throws SQLException;
+    boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException;
 }
