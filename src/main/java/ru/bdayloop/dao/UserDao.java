@@ -15,5 +15,5 @@ public interface UserDao {
     void subscribe(int subscriberId, int targetId) throws SQLException;
     void unsubscribe(int subscriberId, int targetId) throws SQLException;
     List<User> findByName(String name) throws SQLException;
-    boolean isSubscribed(int subscriberId, int targetId) throws SQLException;
+    boolean isSubscribedDirectlyOrViaGroup(int subscriberId, int targetId) throws SQLException;
 }
