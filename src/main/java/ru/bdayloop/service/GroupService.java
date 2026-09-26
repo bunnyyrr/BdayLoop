@@ -19,4 +19,5 @@ public interface GroupService {
     void unsubscribeFromGroup(int subscriberId, int groupId) throws SQLException;
     Group update(int groupId, String newName, int requesterId, User.Role requesterRole) throws SQLException;
     List<Group> findByMember(int userId) throws SQLException;
+    List<Group> findBySubscriber(int subscriberId) throws SQLException;
 }
