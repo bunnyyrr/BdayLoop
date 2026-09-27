@@ -9,8 +9,8 @@ import ru.bdayloop.model.User;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
-import ru.bdayloop.web.dto.CreateGroupRequest;
-import ru.bdayloop.web.dto.UpdateGroupRequest;
+import ru.bdayloop.web.dto.request.CreateGroupRequest;
+import ru.bdayloop.web.dto.request.UpdateGroupRequest;
 import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;

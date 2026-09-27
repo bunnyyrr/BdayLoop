@@ -8,7 +8,7 @@ import ru.bdayloop.model.Message;
 import ru.bdayloop.service.i.MessageService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
-import ru.bdayloop.web.dto.SendMessageRequest;
+import ru.bdayloop.web.dto.request.SendMessageRequest;
 import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;

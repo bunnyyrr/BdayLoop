@@ -1,4 +1,4 @@
-package ru.bdayloop.web.dto;
+package ru.bdayloop.web.dto.request;
 
 import java.time.LocalDate;
 

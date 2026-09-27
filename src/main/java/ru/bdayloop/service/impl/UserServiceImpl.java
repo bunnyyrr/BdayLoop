@@ -6,7 +6,7 @@ import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.service.validation.Validation;
-import ru.bdayloop.web.dto.ImportUserRequest;
+import ru.bdayloop.web.dto.request.ImportUserRequest;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
