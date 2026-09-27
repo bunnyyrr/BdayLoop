@@ -3,9 +3,7 @@ package ru.bdayloop.web.servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
-import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.GroupService;
@@ -13,9 +11,9 @@ import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.CreateGroupRequest;
 import ru.bdayloop.web.dto.UpdateGroupRequest;
+import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 public class GroupServlet extends HttpServlet {
@@ -51,19 +49,11 @@ public class GroupServlet extends HttpServlet {
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
                 }
                 else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    throw new NotFoundException("Не найдено");
                 }
             }
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        }catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -105,16 +95,8 @@ public class GroupServlet extends HttpServlet {
                     JsonUtil.writeBody(resp, group);
                 }
             }
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e){
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -124,8 +106,7 @@ public class GroupServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
+                throw new NotFoundException("Не найдено");
             }
 
             int id =Integer.parseInt(pathInfo.split("/")[1]);
@@ -135,16 +116,8 @@ public class GroupServlet extends HttpServlet {
 
             Group updated =groupService.update(id, body.name(), requesterId, role);
             JsonUtil.writeBody(resp, updated);
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e){
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -154,8 +127,7 @@ public class GroupServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
+                throw new NotFoundException("Не найдено");
             }
 
             String[] parts = pathInfo.split("/");
@@ -173,16 +145,8 @@ public class GroupServlet extends HttpServlet {
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e){
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 }

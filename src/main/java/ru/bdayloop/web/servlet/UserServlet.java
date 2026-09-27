@@ -3,20 +3,17 @@ package ru.bdayloop.web.servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
-import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.UserService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.*;
+import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class UserServlet extends HttpServlet {
     private final UserService userService;
@@ -48,11 +45,11 @@ public class UserServlet extends HttpServlet {
                 resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
             }
             else if (pathInfo.equals("/import")) {
-            SessionUtil.requireAdmin(req);
-            ImportUserRequest[] body = JsonUtil.readBody(req, ImportUserRequest[].class);
-            List<User> created = userService.importUsers(Arrays.asList(body));
-            resp.setStatus(HttpServletResponse.SC_CREATED);
-            JsonUtil.writeBody(resp, created.stream().map(u -> UserResponse.from(u)).toList());
+                SessionUtil.requireAdmin(req);
+                ImportUserRequest[] body = JsonUtil.readBody(req, ImportUserRequest[].class);
+                List<User> created = userService.importUsers(Arrays.asList(body));
+                resp.setStatus(HttpServletResponse.SC_CREATED);
+                JsonUtil.writeBody(resp, created.stream().map(u -> UserResponse.from(u)).toList());
             }
             else{
                 String[] parts =pathInfo.split("/");
@@ -61,16 +58,13 @@ public class UserServlet extends HttpServlet {
                     int subscriberId = SessionUtil.requireUserId(req);
                     userService.subscribe(subscriberId, targetId);
                     resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                } else resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                }
+                else {
+                    throw new NotFoundException("Не найдено");
+                }
             }
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -99,16 +93,8 @@ public class UserServlet extends HttpServlet {
                     JsonUtil.writeBody(resp, UserResponse.from(user));
                 }
             }
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -118,8 +104,7 @@ public class UserServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
+                throw new NotFoundException("Не найдено");
             }
 
             int id = Integer.parseInt(pathInfo.split("/")[1]);
@@ -132,16 +117,8 @@ public class UserServlet extends HttpServlet {
 
             User result = userService.update(updated, requesterId);
             JsonUtil.writeBody(resp, UserResponse.from(result));
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch(SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e){
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -151,8 +128,7 @@ public class UserServlet extends HttpServlet {
 
         try{
             if(pathInfo==null || pathInfo.equals("/")){
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
+                throw new NotFoundException("Не найдено");
             }
             String[] parts =pathInfo.split("/");
             int id = Integer.parseInt((parts[1]));
@@ -166,16 +142,8 @@ public class UserServlet extends HttpServlet {
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch(NumberFormatException e){
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 }
