@@ -140,8 +140,11 @@ public class GroupServlet extends HttpServlet {
             else if (parts.length == 3 && parts[2].equals("subscribe")){
                 groupService.unsubscribeFromGroup(userId, id);
             }
-            else{
+            else if (parts.length == 2){
                 groupService.delete(id, userId, SessionUtil.currentRole(req));
+            }
+            else {
+                throw new NotFoundException("Не найдено");
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

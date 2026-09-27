@@ -142,8 +142,11 @@ public class UserServlet extends HttpServlet {
             if(parts.length == 3 && parts[2].equals("subscribe")){
                 userService.unsubscribe(requesterId, id);
             }
-            else {
+            else if(parts.length == 2){
                 userService.delete(id, requesterId);
+            }
+            else {
+                throw new NotFoundException("Не найдено");
             }
 
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);

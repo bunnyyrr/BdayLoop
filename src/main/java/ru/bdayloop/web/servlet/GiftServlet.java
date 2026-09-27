@@ -60,7 +60,11 @@ public class GiftServlet extends HttpServlet {
             if (pathInfo == null || pathInfo.equals("/")) {
                 throw new NotFoundException("Не найдено");
             }
-            int id =Integer.parseInt(pathInfo.split("/")[1]);
+            String[] parts = pathInfo.split("/");
+            if (parts.length != 2) {
+                throw new NotFoundException("Не найдено");
+            }
+            int id = Integer.parseInt(parts[1]);
             int requesterId = SessionUtil.requireUserId(req);
 
             giftService.delete(id, requesterId);
