@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.bdayloop.exception.BadRequestException;
 import ru.bdayloop.model.Message;
-import ru.bdayloop.service.MessageService;
+import ru.bdayloop.service.i.MessageService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.SendMessageRequest;

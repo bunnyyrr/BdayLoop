@@ -1,4 +1,4 @@
-package ru.bdayloop.dao;
+package ru.bdayloop.dao.i;
 
 import ru.bdayloop.model.User;
 

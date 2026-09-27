@@ -1,4 +1,4 @@
-package ru.bdayloop.service;
+package ru.bdayloop.service.i;
 
 import ru.bdayloop.model.Message;
 

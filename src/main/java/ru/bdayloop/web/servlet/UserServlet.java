@@ -5,7 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
-import ru.bdayloop.service.UserService;
+import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.*;

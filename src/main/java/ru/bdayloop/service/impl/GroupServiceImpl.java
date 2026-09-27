@@ -1,15 +1,14 @@
 package ru.bdayloop.service.impl;
 
-import ru.bdayloop.dao.GroupDao;
+import ru.bdayloop.dao.i.GroupDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
-import ru.bdayloop.service.GroupService;
+import ru.bdayloop.service.i.GroupService;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 public class GroupServiceImpl implements GroupService {
     private final GroupDao groupDao;

@@ -1,10 +1,10 @@
 package ru.bdayloop.service.impl;
 
-import ru.bdayloop.dao.MessageDao;
-import ru.bdayloop.dao.UserDao;
+import ru.bdayloop.dao.i.MessageDao;
+import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.model.Message;
-import ru.bdayloop.service.MessageService;
+import ru.bdayloop.service.i.MessageService;
 
 import java.sql.SQLException;
 import java.util.List;

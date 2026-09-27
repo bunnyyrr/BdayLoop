@@ -1,10 +1,10 @@
 package ru.bdayloop.service.impl;
 
-import ru.bdayloop.dao.GiftDao;
+import ru.bdayloop.dao.i.GiftDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
-import ru.bdayloop.service.GiftService;
+import ru.bdayloop.service.i.GiftService;
 
 import java.sql.SQLException;
 import java.util.List;

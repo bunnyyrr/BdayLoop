@@ -1,14 +1,12 @@
-package ru.bdayloop.dao;
+package ru.bdayloop.service.i;
 
 import ru.bdayloop.model.Gift;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
-public interface GiftDao {
+public interface GiftService {
     Gift create(Gift gift) throws SQLException;
-    void delete(int id) throws SQLException;
+    void delete(int id, int requesterId) throws SQLException;
     List<Gift> findByUserId(int userId) throws SQLException;
-    Optional<Gift> findById(int id) throws SQLException;
 }

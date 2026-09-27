@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.bdayloop.exception.BadRequestException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
-import ru.bdayloop.service.GiftService;
+import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.CreateGiftRequest;

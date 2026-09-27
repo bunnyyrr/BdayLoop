@@ -1,6 +1,6 @@
 package ru.bdayloop.dao.impl;
 
-import ru.bdayloop.dao.UserDao;
+import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.db.ConnectionManager;

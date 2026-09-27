@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
-import ru.bdayloop.service.GroupService;
+import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.CreateGroupRequest;

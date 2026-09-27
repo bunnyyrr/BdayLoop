@@ -1,12 +1,12 @@
 package ru.bdayloop.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
-import ru.bdayloop.dao.UserDao;
+import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
-import ru.bdayloop.service.UserService;
+import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.web.dto.ImportUserRequest;
 
 import java.sql.SQLException;
