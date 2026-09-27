@@ -1,10 +1,11 @@
 package ru.bdayloop.service.impl;
 
-import ru.bdayloop.dao.MessageDao;
-import ru.bdayloop.dao.UserDao;
+import ru.bdayloop.dao.i.MessageDao;
+import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.model.Message;
-import ru.bdayloop.service.MessageService;
+import ru.bdayloop.service.i.MessageService;
+import ru.bdayloop.service.validation.Validation;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -22,6 +23,7 @@ public class MessageServiceImpl implements MessageService {
         if(message.getSenderId()==message.getSubjectUserId()) throw new ForbiddenException("Нельзя обсуждать свой же подарок");
         if(!userDao.isSubscribedDirectlyOrViaGroup(message.getSenderId(), message.getSubjectUserId())) throw new ForbiddenException("Нет доступа к чату - сначала подпишитесь на именинника или на группу, в которой он состоит");
 
+        Validation.requireText(message.getText(), "Сообщение не может быть пустым");
         return messageDao.create(message);
     }
 

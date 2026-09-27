@@ -1,6 +1,6 @@
 package ru.bdayloop.dao.impl;
 
-import ru.bdayloop.dao.GroupDao;
+import ru.bdayloop.dao.i.GroupDao;
 import ru.bdayloop.db.ConnectionManager;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;

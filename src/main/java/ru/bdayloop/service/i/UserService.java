@@ -1,7 +1,7 @@
-package ru.bdayloop.service;
+package ru.bdayloop.service.i;
 
 import ru.bdayloop.model.User;
-import ru.bdayloop.web.dto.ImportUserRequest;
+import ru.bdayloop.web.dto.request.ImportUserRequest;
 
 import java.sql.SQLException;
 import java.util.List;

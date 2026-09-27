@@ -1,15 +1,15 @@
 package ru.bdayloop.service.impl;
 
-import ru.bdayloop.dao.GroupDao;
+import ru.bdayloop.dao.i.GroupDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
-import ru.bdayloop.service.GroupService;
+import ru.bdayloop.service.i.GroupService;
+import ru.bdayloop.service.validation.Validation;
 
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 public class GroupServiceImpl implements GroupService {
     private final GroupDao groupDao;
@@ -25,6 +25,7 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public Group create(Group group) throws SQLException{
+        Validation.requireText(group.getName(), "Название группы не может быть пустым");
         return groupDao.create(group);
     }
 
@@ -71,6 +72,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public Group update(int groupId, String newName, int requesterId, User.Role requesterRole) throws SQLException{
         Group group = permissionCheck(groupId, requesterId, requesterRole);
+        Validation.requireText(newName, "Название группы не может быть пустым");
         Group updated = new Group(group.getId(), newName, group.getCreatedBy());
         groupDao.update(updated);
         return updated;

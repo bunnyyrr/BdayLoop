@@ -1,10 +1,11 @@
 package ru.bdayloop.service.impl;
 
-import ru.bdayloop.dao.GiftDao;
+import ru.bdayloop.dao.i.GiftDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
-import ru.bdayloop.service.GiftService;
+import ru.bdayloop.service.i.GiftService;
+import ru.bdayloop.service.validation.Validation;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -17,6 +18,7 @@ public class GiftServiceImpl implements GiftService {
 
     @Override
     public Gift create(Gift gift) throws SQLException{
+        Validation.requireText(gift.getTitle(), "Название подарка не может быть пустым");
         return giftDao.create(gift);
     }
 

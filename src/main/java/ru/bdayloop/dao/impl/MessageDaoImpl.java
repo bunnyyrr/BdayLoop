@@ -1,6 +1,6 @@
 package ru.bdayloop.dao.impl;
 
-import ru.bdayloop.dao.MessageDao;
+import ru.bdayloop.dao.i.MessageDao;
 import ru.bdayloop.db.ConnectionManager;
 import ru.bdayloop.model.Message;
 

@@ -3,17 +3,16 @@ package ru.bdayloop.web.servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ru.bdayloop.exception.ForbiddenException;
+import ru.bdayloop.exception.BadRequestException;
 import ru.bdayloop.exception.NotFoundException;
-import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.Gift;
-import ru.bdayloop.service.GiftService;
+import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
-import ru.bdayloop.web.dto.CreateGiftRequest;
+import ru.bdayloop.web.dto.request.CreateGiftRequest;
+import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 public class GiftServlet extends HttpServlet {
@@ -33,14 +32,8 @@ public class GiftServlet extends HttpServlet {
             Gift created = giftService.create(newGift);
             resp.setStatus(HttpServletResponse.SC_CREATED);
             JsonUtil.writeBody(resp, created);
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -49,22 +42,13 @@ public class GiftServlet extends HttpServlet {
         try {
             String userIdParam= req.getParameter("userId");
             if(userIdParam == null){
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Нужен параметр userId");
-                return;
+                throw new BadRequestException("Нужен параметр userId");
             }
             int userId = Integer.parseInt(userIdParam);
             List<Gift> gifts = giftService.findByUserId(userId);
             JsonUtil.writeBody(resp, gifts);
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e){
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный userId");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 
@@ -74,24 +58,19 @@ public class GiftServlet extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
-                return;
+                throw new NotFoundException("Не найдено");
             }
-            int id =Integer.parseInt(pathInfo.split("/")[1]);
+            String[] parts = pathInfo.split("/");
+            if (parts.length != 2) {
+                throw new NotFoundException("Не найдено");
+            }
+            int id = Integer.parseInt(parts[1]);
             int requesterId = SessionUtil.requireUserId(req);
 
             giftService.delete(id, requesterId);
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
-        } catch (NotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-        } catch (ForbiddenException e) {
-            resp.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
-        } catch (UnauthorizedException e) {
-            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-        } catch (SQLException e) {
-            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (NumberFormatException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Некорректный id");
+        } catch (Exception e) {
+            ExceptionHandler.handle(resp, e);
         }
     }
 }
