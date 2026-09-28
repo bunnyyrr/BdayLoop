@@ -144,6 +144,7 @@ public class UserServlet extends HttpServlet {
             }
             else if(parts.length == 2){
                 userService.delete(id, requesterId);
+                SessionUtil.logout(req);
             }
             else {
                 throw new NotFoundException("Не найдено");
