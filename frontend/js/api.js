@@ -14,6 +14,15 @@ function requireLogin(){
     return user;
 }
 
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
 async function apiFetch(path, options ={}){
     return fetch(`${API}${path}`, {
         credentials: "include",

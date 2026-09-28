@@ -30,8 +30,13 @@ async function loadMessages() {
     }
 
     el.style.display = "block";
-    el.innerHTML = messages.map(m => `<p><strong>${m.senderId === me.id ? "Вы" : m.senderId}:</strong> ${m.text}</p>`).join("");
-    el.scrollTop = el.scrollHeight;
+    el.replaceChildren(...messages.map(m => {
+        const p = document.createElement("p");
+        const who = document.createElement("strong");
+        who.textContent = (m.senderId === me.id ? "Вы" : m.senderId) + ": ";
+        p.append(who, m.text);
+        return p;
+    }));    el.scrollTop = el.scrollHeight;
 }
 
 document.getElementById("sendMessageForm").addEventListener("submit", async (e) => {

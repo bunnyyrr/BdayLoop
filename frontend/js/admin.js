@@ -20,7 +20,7 @@ document.getElementById("importForm").addEventListener("submit", async (e) => {
     const el = document.getElementById("importResult");
     if (res.ok) {
         const created = await res.json();
-        el.innerHTML = `Импортировано пользователей: ${created.length}<ul>${created.map(u => `<li>${u.name} (@${u.username})</li>`).join("")}</ul>`;
+        el.innerHTML = `Импортировано пользователей: ${created.length}<ul>${created.map(u => `<li>${escapeHtml(u.name)} (@${escapeHtml(u.username)})</li>`).join("")}</ul>`;
         document.getElementById("importForm").reset();
     } else {
         el.textContent = "Ошибка импорта: " + await res.text();

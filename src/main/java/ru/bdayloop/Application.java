@@ -38,6 +38,7 @@ public class Application {
 
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
+        context.getSessionHandler().setHttpOnly(true);
         server.setHandler(context);
 
         context.addServlet(new ServletHolder(new UserServlet(userService)), "/users/*");
