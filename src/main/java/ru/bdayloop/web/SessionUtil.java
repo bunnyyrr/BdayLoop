@@ -12,6 +12,7 @@ public class SessionUtil {
 
     public static void login(HttpServletRequest req, int userId, User.Role role){
         HttpSession session = req.getSession(true);
+        req.changeSessionId();
         session.setAttribute(USER_ID_KEY, userId);
         session.setAttribute(ROLE_KEY, role.name());
     }

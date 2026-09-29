@@ -15,7 +15,7 @@ function renderGroups(groups) {
     const el = document.getElementById("groupsList");
     el.innerHTML = groups.length ? groups.map(g => `
         <article>
-            <strong>${g.name}</strong>
+            <strong>${escapeHtml(g.name)}</strong>
             <a role="button" href="group.html?id=${g.id}">Посмотреть группу</a>
         </article>
     `).join("") : "Групп пока нет.";
@@ -45,7 +45,7 @@ function renderUsers(users) {
     const el = document.getElementById("usersList");
     el.innerHTML = users.length ? users.map(u => `
         <article>
-            <strong>${u.name}</strong> (@${u.username})
+            <strong>${escapeHtml(u.name)}</strong> (@${escapeHtml(u.username)})
             <a role="button" href="user.html?id=${u.id}">Профиль</a>
         </article>
     `).join("") : "Пользователей не найдено.";

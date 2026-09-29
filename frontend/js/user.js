@@ -32,7 +32,7 @@ async function loadUserGroups() {
     const res = await apiFetch(`/groups?memberId=${profileId}`);
     const groups = await res.json();
     document.getElementById("userGroups").innerHTML = groups.length
-        ? groups.map(g => `<a href="group.html?id=${g.id}">${g.name}</a>`).join(", ")
+        ? groups.map(g => `<a href="group.html?id=${g.id}">${escapeHtml(g.name)}</a>`).join(", ")
         : "нет групп";
 }
 
@@ -52,7 +52,7 @@ async function loadSubscriptionStatus() {
     const viaGroups = profileGroups.filter(g => myGroupIds.includes(g.id));
 
     const groupLinks = viaGroups
-        .map(g => `<a href="group.html?id=${g.id}">«${g.name}»</a>`)
+        .map(g => `<a href="group.html?id=${g.id}">«${escapeHtml(g.name)}»</a>`)
         .join(", ");
     const viaText = viaGroups.length === 1 ? "через группу" : "через группы";
     const chatHint = viaGroups.length === 1
@@ -80,8 +80,8 @@ async function loadGifts() {
     const gifts = await res.json();
     const el = document.getElementById("giftsList");
     el.innerHTML = gifts.length ? gifts.map(g => `
-        <li>${g.title} ${isOwnProfile ? `<button data-id="${g.id}" class="delete-gift-btn secondary">Удалить</button>` : ""}</li>
-    `).join("") : "<li>Список подарков пуст.</li>";
+        <li>${escapeHtml(g.title)} ${isOwnProfile ? `<button data-id="${g.id}" class="delete-gift-btn secondary">Удалить</button>` : ""}</li>
+        `).join("") : "<li>Список подарков пуст.</li>";
 }
 
 document.getElementById("editForm")?.addEventListener("submit", async (e) => {

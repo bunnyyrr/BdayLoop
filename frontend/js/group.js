@@ -31,8 +31,7 @@ async function loadMembers() {
 
     const el = document.getElementById("membersList");
     el.innerHTML = users.length
-        ? users.map(u => `<li><a href="user.html?id=${u.id}">${u.name}</a></li>`).join("")
-        : "<li>Участников пока нет.</li>";
+        ? users.map(u => `<li><a href="user.html?id=${u.id}">${escapeHtml(u.name)}</a></li>`).join("")        : "<li>Участников пока нет.</li>";
 }
 
 async function loadSubscriptionStatus() {
