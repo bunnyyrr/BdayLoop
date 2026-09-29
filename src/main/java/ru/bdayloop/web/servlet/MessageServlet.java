@@ -9,6 +9,7 @@ import ru.bdayloop.service.i.MessageService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.request.SendMessageRequest;
+import ru.bdayloop.web.dto.response.MessageResponse;
 import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class MessageServlet extends HttpServlet {
             Message newMessage = new Message(0, body.subjectId(), senderId, body.text(), null);
             Message created = messageService.sendMessage(newMessage);
             resp.setStatus(HttpServletResponse.SC_CREATED);
-            JsonUtil.writeBody(resp, created);
+            JsonUtil.writeBody(resp, MessageResponse.from(created));
         } catch (Exception e) {
             ExceptionHandler.handle(resp, e);
         }
@@ -47,7 +48,7 @@ public class MessageServlet extends HttpServlet {
             int senderId = SessionUtil.requireUserId(req);
 
             List<Message> messages = messageService.getMessages(subjectId, senderId);
-            JsonUtil.writeBody(resp, messages);
+            JsonUtil.writeBody(resp, messages.stream().map(m -> MessageResponse.from(m)).toList());
         } catch (Exception e) {
             ExceptionHandler.handle(resp, e);
         }

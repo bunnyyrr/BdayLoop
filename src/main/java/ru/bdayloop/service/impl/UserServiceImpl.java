@@ -4,6 +4,7 @@ import org.mindrot.jbcrypt.BCrypt;
 import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
+import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.service.validation.Validation;
 import ru.bdayloop.web.dto.request.ImportUserRequest;
@@ -104,12 +105,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> importUsers(List<ImportUserRequest> requests) throws SQLException{
+    public List<User> importUsers(List<UserRegistration> registrations) throws SQLException{
         List<User> created = new ArrayList<>();
-        for(ImportUserRequest r : requests) {
-            User.Role role = parseRole(r.role());
-            User newUser= new User(0, r.name(), r.birthday(), r.username(), null, role);
-            created.add(register(newUser, r.password()));
+        for(UserRegistration r : registrations) {
+            created.add(register(r.user(), r.password()));
         }
         return created;
     }
@@ -125,17 +124,6 @@ public class UserServiceImpl implements UserService {
         Validation.requireText(username, "Логин не может быть пустым");
         if(birthday.isAfter(LocalDate.now())){
             throw new BadRequestException("Дата рождения не может быть в будущем");
-        }
-    }
-
-    private User.Role parseRole(String role){
-        if(role == null){
-            return User.Role.USER;
-        }
-        try {
-            return User.Role.valueOf(role);
-        } catch (IllegalArgumentException e){
-            throw new BadRequestException("Неизвестная роль: " + role);
         }
     }
 }

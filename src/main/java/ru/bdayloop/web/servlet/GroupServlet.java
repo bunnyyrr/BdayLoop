@@ -11,6 +11,7 @@ import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.request.CreateGroupRequest;
 import ru.bdayloop.web.dto.request.UpdateGroupRequest;
+import ru.bdayloop.web.dto.response.GroupResponse;
 import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;
@@ -33,7 +34,7 @@ public class GroupServlet extends HttpServlet {
                 Group newGroup = new Group(0, body.name(), creatorId);
                 Group created = groupService.create(newGroup);
                 resp.setStatus(HttpServletResponse.SC_CREATED);
-                JsonUtil.writeBody(resp, created);
+                JsonUtil.writeBody(resp, GroupResponse.from(created));
             }
             else {
                 String[] parts = pathInfo.split("/");
@@ -80,8 +81,7 @@ public class GroupServlet extends HttpServlet {
                 else {
                     groups = groupService.findAll();
                 }
-                JsonUtil.writeBody(resp, groups);
-            }
+                JsonUtil.writeBody(resp, groups.stream().map(g -> GroupResponse.from(g)).toList());            }
             else {
                 String[] parts = pathInfo.split("/");
                 int id =Integer.parseInt(parts[1]);
@@ -92,7 +92,7 @@ public class GroupServlet extends HttpServlet {
                 }
                 else {
                     Group group = groupService.findById(id);
-                    JsonUtil.writeBody(resp, group);
+                    JsonUtil.writeBody(resp, GroupResponse.from(group));
                 }
             }
         } catch (Exception e) {
@@ -115,7 +115,7 @@ public class GroupServlet extends HttpServlet {
             UpdateGroupRequest body = JsonUtil.readBody(req, UpdateGroupRequest.class);
 
             Group updated =groupService.update(id, body.name(), requesterId, role);
-            JsonUtil.writeBody(resp, updated);
+            JsonUtil.writeBody(resp, GroupResponse.from(updated));
         } catch (Exception e) {
             ExceptionHandler.handle(resp, e);
         }
