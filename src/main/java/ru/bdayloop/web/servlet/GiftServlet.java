@@ -10,6 +10,7 @@ import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.request.CreateGiftRequest;
+import ru.bdayloop.web.dto.response.GiftResponse;
 import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class GiftServlet extends HttpServlet {
             Gift newGift = new Gift(0, userId, body.title());
             Gift created = giftService.create(newGift);
             resp.setStatus(HttpServletResponse.SC_CREATED);
-            JsonUtil.writeBody(resp, created);
+            JsonUtil.writeBody(resp, GiftResponse.from(created));
         } catch (Exception e) {
             ExceptionHandler.handle(resp, e);
         }
@@ -46,7 +47,7 @@ public class GiftServlet extends HttpServlet {
             }
             int userId = Integer.parseInt(userIdParam);
             List<Gift> gifts = giftService.findByUserId(userId);
-            JsonUtil.writeBody(resp, gifts);
+            JsonUtil.writeBody(resp, gifts.stream().map(g->GiftResponse.from(g)).toList());
         } catch (Exception e) {
             ExceptionHandler.handle(resp, e);
         }
