@@ -1,7 +1,7 @@
 package ru.bdayloop.service.i;
 
 import ru.bdayloop.model.User;
-import ru.bdayloop.web.dto.request.ImportUserRequest;
+import ru.bdayloop.service.command.UserRegistration;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -16,6 +16,6 @@ public interface UserService {
     void delete(int id, int requesterId) throws SQLException;
     void subscribe(int subscriberId, int targetId) throws SQLException;
     void unsubscribe(int subscriberId, int targetId) throws SQLException;
-    List<User> importUsers(List<ImportUserRequest> requests) throws SQLException;
+    List<User> importUsers(List<UserRegistration> registrations) throws SQLException;
     boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException;
 }

@@ -3,8 +3,10 @@ package ru.bdayloop.web.servlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ru.bdayloop.exception.BadRequestException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
+import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.web.JsonUtil;
 import ru.bdayloop.web.SessionUtil;
@@ -52,7 +54,10 @@ public class UserServlet extends HttpServlet {
             else if (pathInfo.equals("/import")) {
                 SessionUtil.requireAdmin(req);
                 ImportUserRequest[] body = JsonUtil.readBody(req, ImportUserRequest[].class);
-                List<User> created = userService.importUsers(Arrays.asList(body));
+                List<UserRegistration> registrations = Arrays.stream(body)
+                        .map(r -> new UserRegistration(new User(0, r.name(), r.birthday(), r.username(), null, parseRole(r.role())), r.password()))
+                        .toList();
+                List<User> created = userService.importUsers(registrations);
                 resp.setStatus(HttpServletResponse.SC_CREATED);
                 JsonUtil.writeBody(resp, created.stream().map(u -> UserResponse.from(u)).toList());
             }
@@ -153,6 +158,17 @@ public class UserServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
         } catch (Exception e) {
             ExceptionHandler.handle(resp, e);
+        }
+    }
+
+    private User.Role parseRole(String role){
+        if(role == null){
+            return User.Role.USER;
+        }
+        try {
+            return User.Role.valueOf(role);
+        } catch (IllegalArgumentException e){
+            throw new BadRequestException("Неизвестная роль: " + role);
         }
     }
 }
