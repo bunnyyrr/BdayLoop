@@ -1,9 +1,10 @@
 package ru.bdayloop.dao.impl;
 
 import ru.bdayloop.dao.i.GiftDao;
-import ru.bdayloop.db.ConnectionManager;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,10 +14,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class GiftDaoImpl implements GiftDao {
+    private final DataSource dataSource;
+
+    public GiftDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
     public Gift create(Gift gift) throws SQLException {
         String sql = "INSERT INTO gifts(user_id, title) VALUES (?, ?) RETURNING id";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setInt(1, gift.getUserId());
@@ -35,7 +41,7 @@ public class GiftDaoImpl implements GiftDao {
     public void delete(int id) throws SQLException {
         String sql = "DELETE FROM gifts WHERE id =?";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
 
@@ -49,7 +55,7 @@ public class GiftDaoImpl implements GiftDao {
     public List<Gift> findByUserId(int userId) throws SQLException {
         String sql = "SELECT id, user_id, title FROM gifts WHERE user_id =?";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, userId);
 
@@ -65,7 +71,7 @@ public class GiftDaoImpl implements GiftDao {
 
     public Optional<Gift> findById(int id) throws SQLException {
         String sql = "SELECT id, user_id, title FROM gifts WHERE id =?";
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try(ResultSet rs = ps.executeQuery()){

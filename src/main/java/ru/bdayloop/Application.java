@@ -13,6 +13,7 @@ import ru.bdayloop.dao.impl.GiftDaoImpl;
 import ru.bdayloop.dao.impl.GroupDaoImpl;
 import ru.bdayloop.dao.impl.MessageDaoImpl;
 import ru.bdayloop.dao.impl.UserDaoImpl;
+import ru.bdayloop.db.DataSourceFactory;
 import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.service.i.MessageService;
@@ -24,14 +25,17 @@ import ru.bdayloop.service.impl.UserServiceImpl;
 import ru.bdayloop.web.CorsFilter;
 import ru.bdayloop.web.servlet.*;
 
+import javax.sql.DataSource;
+
 public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws Exception {
-        UserDao userDao = new UserDaoImpl();
-        GroupDao groupDao = new GroupDaoImpl();
-        GiftDao giftDao = new GiftDaoImpl();
-        MessageDao messageDao = new MessageDaoImpl();
+        DataSource dataSource= DataSourceFactory.fromEnv();
+        UserDao userDao = new UserDaoImpl(dataSource);
+        GroupDao groupDao = new GroupDaoImpl(dataSource);
+        GiftDao giftDao = new GiftDaoImpl(dataSource);
+        MessageDao messageDao = new MessageDaoImpl(dataSource);
 
         UserService userService = new UserServiceImpl(userDao);
         GroupService groupService= new GroupServiceImpl(groupDao);
