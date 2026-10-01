@@ -3,6 +3,8 @@ package ru.bdayloop;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.bdayloop.dao.i.GiftDao;
 import ru.bdayloop.dao.i.GroupDao;
 import ru.bdayloop.dao.i.MessageDao;
@@ -23,6 +25,8 @@ import ru.bdayloop.web.CorsFilter;
 import ru.bdayloop.web.servlet.*;
 
 public class Application {
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
+
     public static void main(String[] args) throws Exception {
         UserDao userDao = new UserDaoImpl();
         GroupDao groupDao = new GroupDaoImpl();
@@ -48,7 +52,7 @@ public class Application {
         context.addFilter(CorsFilter.class, "/*", null);
 
         server.start();
-        System.out.println("Сервер запущен на http://localhost:8080");
+        log.info("Сервер запущен на http://localhost:8080");
         server.join();
     }
 }
