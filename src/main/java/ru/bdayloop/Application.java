@@ -1,5 +1,6 @@
 package ru.bdayloop;
 
+import com.zaxxer.hikari.HikariDataSource;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -25,13 +26,14 @@ import ru.bdayloop.service.impl.UserServiceImpl;
 import ru.bdayloop.web.CorsFilter;
 import ru.bdayloop.web.servlet.*;
 
-import javax.sql.DataSource;
 
 public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws Exception {
-        DataSource dataSource= DataSourceFactory.fromEnv();
+        HikariDataSource dataSource = DataSourceFactory.fromEnv();
+        Runtime.getRuntime().addShutdownHook(new Thread(dataSource::close));
+
         UserDao userDao = new UserDaoImpl(dataSource);
         GroupDao groupDao = new GroupDaoImpl(dataSource);
         GiftDao giftDao = new GiftDaoImpl(dataSource);
