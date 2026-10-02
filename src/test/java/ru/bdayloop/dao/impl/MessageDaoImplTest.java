@@ -1,45 +1,21 @@
 package ru.bdayloop.dao.impl;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import ru.bdayloop.db.ConnectionManager;
 import ru.bdayloop.model.Message;
 import ru.bdayloop.model.User;
 
-import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
-class MessageDaoImplTest {
+class MessageDaoImplTest extends DaoTestBase {
 
-    @Container
-    static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16")
-            .withInitScript("schema.sql");
-
-    MessageDaoImpl messageDao = new MessageDaoImpl();
-    UserDaoImpl userDao = new UserDaoImpl();
-
-    @BeforeAll
-    static void setUpConnection() {
-        ConnectionManager.configure(postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
-    }
-
-    @BeforeEach
-    void cleanTables() throws SQLException {
-        try (Connection conn = ConnectionManager.getConnection();
-             Statement st = conn.createStatement()) {
-            st.execute("TRUNCATE TABLE users CASCADE");
-        }
-    }
+    MessageDaoImpl messageDao = new MessageDaoImpl(dataSource);
+    UserDaoImpl userDao = new UserDaoImpl(dataSource);
 
     @Test
     void createAndFindBySubjectUserId_returnsSameMessage() throws SQLException {

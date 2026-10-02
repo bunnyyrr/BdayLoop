@@ -3,8 +3,7 @@ package ru.bdayloop.dao.impl;
 import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
-import ru.bdayloop.db.ConnectionManager;
-
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,10 +14,15 @@ import java.util.List;
 import java.util.Optional;
 
 public class UserDaoImpl implements UserDao {
+    private final DataSource dataSource;
+    public UserDaoImpl(DataSource dataSource){
+        this.dataSource= dataSource;
+    }
+
     public User create (User user) throws SQLException {
         String sql = "INSERT INTO Users(name, birthday, username, password_hash, role) VALUES (?, ?, ?, ?, ?) RETURNING id";
 
-        try (Connection conn = ConnectionManager.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, user.getName());
             ps.setObject(2, user.getBirthday());
             ps.setString(3, user.getUsername());
@@ -39,7 +43,7 @@ public class UserDaoImpl implements UserDao {
     public Optional<User> findById(int id) throws SQLException {
         String sql = "SELECT id, name, birthday, username, password_hash, role FROM users WHERE id = ?";
 
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, id);
 
@@ -51,7 +55,7 @@ public class UserDaoImpl implements UserDao {
     public Optional<User> findByUsername(String username) throws SQLException {
         String sql = "SELECT id, name, birthday, username, password_hash, role FROM users WHERE username = ?";
 
-        try (Connection conn = ConnectionManager.getConnection();
+        try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, username);
@@ -65,7 +69,7 @@ public class UserDaoImpl implements UserDao {
     public void update(User user) throws SQLException{
         String sql = "UPDATE users SET name =?, birthday = ?, username = ?, password_hash = ?, role = ? WHERE id =?";
 
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setString(1, user.getName());
             ps.setObject(2, user.getBirthday());
@@ -84,7 +88,7 @@ public class UserDaoImpl implements UserDao {
     public void delete(int id) throws SQLException{
         String sql ="DELETE FROM users WHERE id = ?";
 
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, id);
 
@@ -96,7 +100,7 @@ public class UserDaoImpl implements UserDao {
     }
     public void subscribe(int subscriberId, int targetId) throws SQLException{
         String sql = "INSERT INTO subscriptions(subscriber_id, target_id) VALUES(?,?)";
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
         PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, subscriberId);
             ps.setInt(2, targetId);
@@ -107,7 +111,7 @@ public class UserDaoImpl implements UserDao {
     public void unsubscribe(int subscriberId, int targetId) throws SQLException{
         String sql = "DELETE FROM subscriptions WHERE subscriber_id=? AND target_id=?";
 
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, subscriberId);
             ps.setInt(2, targetId);
@@ -118,7 +122,7 @@ public class UserDaoImpl implements UserDao {
     public List<User> findByName(String name) throws SQLException{
         String sql = "SELECT id, name, birthday, username, password_hash, role FROM users WHERE name ILIKE ? OR username ILIKE ? OR CAST(id AS TEXT) ILIKE ?";
 
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, "%"+ name +"%");
             ps.setString(2, "%"+ name +"%");
@@ -145,7 +149,7 @@ public class UserDaoImpl implements UserDao {
             )
             """;
 
-        try(Connection conn= ConnectionManager.getConnection();
+        try(Connection conn= dataSource.getConnection();
         PreparedStatement ps =conn.prepareStatement(sql)){
             ps.setInt(1, subscriberId);
             ps.setInt(2, targetId);
@@ -162,7 +166,7 @@ public class UserDaoImpl implements UserDao {
     public boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException{
         String sql = "SELECT 1 FROM subscriptions WHERE subscriber_id = ? AND target_id = ?";
 
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, subscriberId);
             ps.setInt(2, targetId);

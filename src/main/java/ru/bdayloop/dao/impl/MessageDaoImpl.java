@@ -1,19 +1,24 @@
 package ru.bdayloop.dao.impl;
 
 import ru.bdayloop.dao.i.MessageDao;
-import ru.bdayloop.db.ConnectionManager;
 import ru.bdayloop.model.Message;
 
+import javax.sql.DataSource;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDaoImpl implements MessageDao {
+    private final DataSource dataSource;
+
+    public MessageDaoImpl(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
     public Message create(Message message) throws SQLException{
         String sql ="INSERT INTO messages(subject_user_id, sender_id, text) VALUES(?,?,?) RETURNING id, created_at";
 
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, message.getSubjectUserId());
             ps.setInt(2, message.getSenderId());
@@ -32,7 +37,7 @@ public class MessageDaoImpl implements MessageDao {
 
     public List<Message> findBySubjectUserId(int subjectUserId) throws SQLException{
         String sql = "SELECT id, sender_id, text, created_at FROM messages WHERE subject_user_id=? ORDER BY created_at";
-        try(Connection conn = ConnectionManager.getConnection();
+        try(Connection conn = dataSource.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)){
             ps.setInt(1, subjectUserId);
 
