@@ -15,6 +15,7 @@ import ru.bdayloop.dao.impl.GroupDaoImpl;
 import ru.bdayloop.dao.impl.MessageDaoImpl;
 import ru.bdayloop.dao.impl.UserDaoImpl;
 import ru.bdayloop.db.DataSourceFactory;
+import ru.bdayloop.db.DatabaseMigrator;
 import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.service.i.MessageService;
@@ -33,6 +34,7 @@ public class Application {
     public static void main(String[] args) throws Exception {
         HikariDataSource dataSource = DataSourceFactory.fromEnv();
         Runtime.getRuntime().addShutdownHook(new Thread(dataSource::close));
+        DatabaseMigrator.migrate(dataSource);
 
         UserDao userDao = new UserDaoImpl(dataSource);
         GroupDao groupDao = new GroupDaoImpl(dataSource);
