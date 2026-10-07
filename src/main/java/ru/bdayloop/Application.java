@@ -1,11 +1,12 @@
 package ru.bdayloop;
 
-import com.zaxxer.hikari.HikariDataSource;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import ru.bdayloop.config.AppConfig;
 import ru.bdayloop.dao.i.GiftDao;
 import ru.bdayloop.dao.i.GroupDao;
 import ru.bdayloop.dao.i.MessageDao;
@@ -14,8 +15,6 @@ import ru.bdayloop.dao.impl.GiftDaoImpl;
 import ru.bdayloop.dao.impl.GroupDaoImpl;
 import ru.bdayloop.dao.impl.MessageDaoImpl;
 import ru.bdayloop.dao.impl.UserDaoImpl;
-import ru.bdayloop.db.DataSourceFactory;
-import ru.bdayloop.db.DatabaseMigrator;
 import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.service.i.MessageService;
@@ -25,16 +24,21 @@ import ru.bdayloop.service.impl.GroupServiceImpl;
 import ru.bdayloop.service.impl.MessageServiceImpl;
 import ru.bdayloop.service.impl.UserServiceImpl;
 import ru.bdayloop.web.CorsFilter;
-import ru.bdayloop.web.servlet.*;
+import ru.bdayloop.web.servlet.GiftServlet;
+import ru.bdayloop.web.servlet.GroupServlet;
+import ru.bdayloop.web.servlet.MessageServlet;
+import ru.bdayloop.web.servlet.UserServlet;
+
+import javax.sql.DataSource;
 
 
 public class Application {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) throws Exception {
-        HikariDataSource dataSource = DataSourceFactory.fromEnv();
-        Runtime.getRuntime().addShutdownHook(new Thread(dataSource::close));
-        DatabaseMigrator.migrate(dataSource);
+        AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+        ctx.registerShutdownHook();
+        DataSource dataSource = ctx.getBean(DataSource.class);
 
         UserDao userDao = new UserDaoImpl(dataSource);
         GroupDao groupDao = new GroupDaoImpl(dataSource);
