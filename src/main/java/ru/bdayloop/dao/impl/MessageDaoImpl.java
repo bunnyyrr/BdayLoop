@@ -1,5 +1,6 @@
 package ru.bdayloop.dao.impl;
 
+import org.springframework.stereotype.Repository;
 import ru.bdayloop.dao.i.MessageDao;
 import ru.bdayloop.model.Message;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class MessageDaoImpl implements MessageDao {
     private final DataSource dataSource;
 

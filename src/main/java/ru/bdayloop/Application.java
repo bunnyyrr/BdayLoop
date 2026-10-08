@@ -7,29 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import ru.bdayloop.config.AppConfig;
-import ru.bdayloop.dao.i.GiftDao;
-import ru.bdayloop.dao.i.GroupDao;
-import ru.bdayloop.dao.i.MessageDao;
-import ru.bdayloop.dao.i.UserDao;
-import ru.bdayloop.dao.impl.GiftDaoImpl;
-import ru.bdayloop.dao.impl.GroupDaoImpl;
-import ru.bdayloop.dao.impl.MessageDaoImpl;
-import ru.bdayloop.dao.impl.UserDaoImpl;
 import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.service.i.MessageService;
 import ru.bdayloop.service.i.UserService;
-import ru.bdayloop.service.impl.GiftServiceImpl;
-import ru.bdayloop.service.impl.GroupServiceImpl;
-import ru.bdayloop.service.impl.MessageServiceImpl;
-import ru.bdayloop.service.impl.UserServiceImpl;
 import ru.bdayloop.web.CorsFilter;
 import ru.bdayloop.web.servlet.GiftServlet;
 import ru.bdayloop.web.servlet.GroupServlet;
 import ru.bdayloop.web.servlet.MessageServlet;
 import ru.bdayloop.web.servlet.UserServlet;
-
-import javax.sql.DataSource;
 
 
 public class Application {
@@ -38,17 +24,6 @@ public class Application {
     public static void main(String[] args) throws Exception {
         AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
         ctx.registerShutdownHook();
-        DataSource dataSource = ctx.getBean(DataSource.class);
-
-        UserDao userDao = new UserDaoImpl(dataSource);
-        GroupDao groupDao = new GroupDaoImpl(dataSource);
-        GiftDao giftDao = new GiftDaoImpl(dataSource);
-        MessageDao messageDao = new MessageDaoImpl(dataSource);
-
-        UserService userService = new UserServiceImpl(userDao);
-        GroupService groupService= new GroupServiceImpl(groupDao);
-        GiftService giftService = new GiftServiceImpl(giftDao);
-        MessageService messageService = new MessageServiceImpl(messageDao, userDao);
 
         Server server = new Server(8080);
 
@@ -57,12 +32,11 @@ public class Application {
         context.getSessionHandler().setHttpOnly(true);
         server.setHandler(context);
 
-        context.addServlet(new ServletHolder(new UserServlet(userService)), "/users/*");
-        context.addServlet(new ServletHolder(new GroupServlet(groupService)), "/groups/*");
-        context.addServlet(new ServletHolder(new GiftServlet(giftService)), "/gifts/*");
-        context.addServlet(new ServletHolder(new MessageServlet(messageService)), "/messages/*");
+        context.addServlet(new ServletHolder(new UserServlet(ctx.getBean(UserService.class))), "/users/*");
+        context.addServlet(new ServletHolder(new GroupServlet(ctx.getBean(GroupService.class))), "/groups/*");
+        context.addServlet(new ServletHolder(new GiftServlet(ctx.getBean(GiftService.class))), "/gifts/*");
+        context.addServlet(new ServletHolder(new MessageServlet(ctx.getBean(MessageService.class))), "/messages/*");
         context.addFilter(CorsFilter.class, "/*", null);
-
         server.start();
         log.info("Сервер запущен на http://localhost:8080");
         server.join();
