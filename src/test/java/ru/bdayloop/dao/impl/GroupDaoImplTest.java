@@ -12,7 +12,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Testcontainers
 class GroupDaoImplTest extends DaoTestBase {
 
     GroupDaoImpl groupDao = new GroupDaoImpl(dataSource);

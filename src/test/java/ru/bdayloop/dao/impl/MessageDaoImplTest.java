@@ -11,7 +11,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Testcontainers
 class MessageDaoImplTest extends DaoTestBase {
 
     MessageDaoImpl messageDao = new MessageDaoImpl(dataSource);
