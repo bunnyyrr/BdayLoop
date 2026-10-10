@@ -1,7 +1,9 @@
 package ru.bdayloop.dao.impl;
 
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.bdayloop.dao.i.MessageDao;
+import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.model.Message;
 import ru.bdayloop.model.User;
 
@@ -11,11 +13,12 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Testcontainers
 class MessageDaoImplTest extends DaoTestBase {
 
-    MessageDaoImpl messageDao = new MessageDaoImpl(dataSource);
-    UserDaoImpl userDao = new UserDaoImpl(dataSource);
+    @Autowired
+    MessageDao messageDao;
+    @Autowired
+    UserDao userDao;
 
     @Test
     void createAndFindBySubjectUserId_returnsSameMessage() throws SQLException {

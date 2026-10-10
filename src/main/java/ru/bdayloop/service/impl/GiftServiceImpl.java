@@ -1,5 +1,6 @@
 package ru.bdayloop.service.impl;
 
+import org.springframework.stereotype.Service;
 import ru.bdayloop.dao.i.GiftDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
@@ -10,6 +11,7 @@ import ru.bdayloop.service.validation.Validation;
 import java.sql.SQLException;
 import java.util.List;
 
+@Service
 public class GiftServiceImpl implements GiftService {
     private final GiftDao giftDao;
     public GiftServiceImpl(GiftDao giftDao){

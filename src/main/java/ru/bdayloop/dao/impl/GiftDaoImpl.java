@@ -1,5 +1,6 @@
 package ru.bdayloop.dao.impl;
 
+import org.springframework.stereotype.Repository;
 import ru.bdayloop.dao.i.GiftDao;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class GiftDaoImpl implements GiftDao {
     private final DataSource dataSource;
 

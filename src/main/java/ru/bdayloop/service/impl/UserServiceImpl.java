@@ -1,6 +1,7 @@
 package ru.bdayloop.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.stereotype.Service;
 import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
     public UserServiceImpl(UserDao userDao){

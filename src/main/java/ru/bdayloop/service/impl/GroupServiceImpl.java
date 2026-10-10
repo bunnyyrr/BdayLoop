@@ -1,5 +1,6 @@
 package ru.bdayloop.service.impl;
 
+import org.springframework.stereotype.Service;
 import ru.bdayloop.dao.i.GroupDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
@@ -11,6 +12,7 @@ import ru.bdayloop.service.validation.Validation;
 import java.sql.SQLException;
 import java.util.List;
 
+@Service
 public class GroupServiceImpl implements GroupService {
     private final GroupDao groupDao;
     public GroupServiceImpl (GroupDao groupDao){
