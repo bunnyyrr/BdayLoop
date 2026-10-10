@@ -1,7 +1,8 @@
 package ru.bdayloop.dao.impl;
 
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.model.User;
 
 import java.sql.SQLException;
@@ -13,7 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UserDaoImplTest extends DaoTestBase {
 
-    UserDaoImpl userDao = new UserDaoImpl(dataSource);
+    @Autowired
+    UserDao userDao;
 
     @Test
     void createAndFindById_returnsSameUser() throws SQLException {

@@ -1,7 +1,9 @@
 package ru.bdayloop.dao.impl;
 
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.bdayloop.dao.i.GroupDao;
+import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
 
@@ -14,8 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GroupDaoImplTest extends DaoTestBase {
 
-    GroupDaoImpl groupDao = new GroupDaoImpl(dataSource);
-    UserDaoImpl userDao = new UserDaoImpl(dataSource);
+    @Autowired
+    GroupDao groupDao;
+    @Autowired
+    UserDao userDao;
 
     @Test
     void createAndFindById_returnsSameGroup() throws SQLException {
