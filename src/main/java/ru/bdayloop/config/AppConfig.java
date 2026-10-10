@@ -14,7 +14,7 @@ import javax.sql.DataSource;
 
 @Configuration
 @ComponentScan("ru.bdayloop")
-@PropertySource("classpath:aplication.properties")
+@PropertySource("classpath:application.properties")
 public class AppConfig {
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeholderConfigurer(){
