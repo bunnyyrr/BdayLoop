@@ -1,0 +1,1178 @@
+{
+  "info": {
+    "name": "BdayLoop API",
+    "description": "Контракт API: сквозной сценарий на двух пользователях (Алиса и Боб), в конце всё за собой удаляет. Запуск: Run collection по порядку; приложение и БД должны быть подняты",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "host",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "0. Выйти (на случай сессии от прошлого прогона)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{host}}/users/logout"
+      }
+    },
+    {
+      "name": "1. Без сессии → 401",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"401 text/plain\", () => {",
+              "    pm.response.to.have.status(401);",
+              "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/plain\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/users"
+      }
+    },
+    {
+      "name": "2. Регистрация Алисы (именинница)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"201, дата строкой, без хэша\", () => {",
+              "    pm.response.to.have.status(201);",
+              "    const u = pm.response.json();",
+              "    pm.expect(u.birthday).to.eql(\"2000-10-05\");",
+              "    pm.expect(u.role).to.eql(\"USER\");",
+              "    pm.expect(u).to.not.have.property(\"passwordHash\");",
+              "    pm.collectionVariables.set(\"aliceId\", u.id);",
+              "    pm.collectionVariables.set(\"aliceUsername\", u.username);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Алиса\", \"birthday\": \"2000-10-05\", \"username\": \"alice_{{$timestamp}}\", \"password\": \"secret\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "3. Регистрация Боба (друг)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"201\", () => pm.response.to.have.status(201));",
+              "const u = pm.response.json();",
+              "pm.collectionVariables.set(\"bobId\", u.id);",
+              "pm.collectionVariables.set(\"bobUsername\", u.username);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Боб\", \"birthday\": \"1999-03-15\", \"username\": \"bob_{{$timestamp}}\", \"password\": \"secret\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "4. Занятый логин → 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Клон\", \"birthday\": \"2000-01-01\", \"username\": \"{{aliceUsername}}\", \"password\": \"secret\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "5. Неверный пароль → 401",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"{{aliceUsername}}\", \"password\": \"wrong\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "6. Логин Алисы",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"{{aliceUsername}}\", \"password\": \"secret\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "7. Алиса редактирует профиль",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, имя обновилось\", () => {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json().name).to.eql(\"Алиса Т.\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users/{{aliceId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Алиса Т.\", \"birthday\": \"2000-10-05\", \"username\": \"{{aliceUsername}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "8. Алиса добавляет подарок",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"201\", () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set(\"giftId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/gifts",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"Книга\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "9. Пустой подарок → 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/gifts",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": \"   \"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "10. Кривой JSON → 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/gifts",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"title\": ",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "11. Алиса создаёт группу",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"201, createdBy = Алиса\", () => {",
+              "    pm.response.to.have.status(201);",
+              "    const g = pm.response.json();",
+              "    pm.expect(String(g.createdBy)).to.eql(String(pm.collectionVariables.get(\"aliceId\")));",
+              "    pm.collectionVariables.set(\"groupId\", g.id);",
+              "    pm.collectionVariables.set(\"groupName\", g.name);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/groups",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Volley-{{$timestamp}}\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "12. Алиса вступает в группу",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{host}}/groups/{{groupId}}/join"
+      }
+    },
+    {
+      "name": "13. Повторное вступление → 409",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{host}}/groups/{{groupId}}/join"
+      }
+    },
+    {
+      "name": "14. Свой чат → 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/messages?subjectId={{aliceId}}"
+      }
+    },
+    {
+      "name": "15. Подписка на себя → 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}/subscribe"
+      }
+    },
+    {
+      "name": "16. Логин Боба",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"{{bobUsername}}\", \"password\": \"secret\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "17. Поиск пользователей",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, нашлась Алиса\", () => {",
+              "    pm.response.to.have.status(200);",
+              "    const aliceId = String(pm.collectionVariables.get(\"aliceId\"));",
+              "    pm.expect(pm.response.json().some(u => String(u.id) === aliceId)).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/users?name={{aliceUsername}}"
+      }
+    },
+    {
+      "name": "18. Карточка Алисы",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}"
+      }
+    },
+    {
+      "name": "19. Некорректный id → 400",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/users/abc"
+      }
+    },
+    {
+      "name": "20. Неизвестный путь → 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{host}}/users/nope"
+      }
+    },
+    {
+      "name": "21. Вишлист Алисы",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, один подарок\", () => {",
+              "    pm.response.to.have.status(200);",
+              "    const gifts = pm.response.json();",
+              "    pm.expect(gifts).to.have.lengthOf(1);",
+              "    pm.expect(gifts[0].title).to.eql(\"Книга\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/gifts?userId={{aliceId}}"
+      }
+    },
+    {
+      "name": "22. Боб удаляет чужой подарок → 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/gifts/{{giftId}}"
+      }
+    },
+    {
+      "name": "23. Боб переименовывает чужую группу → 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/groups/{{groupId}}",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"name\": \"Zahvat\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "24. Чат без подписки → 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/messages",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"subjectId\": {{aliceId}}, \"text\": \"Привет\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "25. Боб подписывается на группу",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{host}}/groups/{{groupId}}/subscribe"
+      }
+    },
+    {
+      "name": "26. Мои группы-подписки",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, группа в списке\", () => {",
+              "    pm.response.to.have.status(200);",
+              "    const groupId = String(pm.collectionVariables.get(\"groupId\"));",
+              "    pm.expect(pm.response.json().some(g => String(g.id) === groupId)).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/groups?subscribed=true"
+      }
+    },
+    {
+      "name": "27. Личной подписки на Алису пока нет",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"subscribed=false\", () => pm.expect(pm.response.json().subscribed).to.be.false);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}/subscribe"
+      }
+    },
+    {
+      "name": "28. Чат через подписку на группу",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"201, createdAt строкой\", () => {",
+              "    pm.response.to.have.status(201);",
+              "    pm.expect(pm.response.json().createdAt).to.be.a(\"string\");",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/messages",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"subjectId\": {{aliceId}}, \"text\": \"Скинемся на книгу?\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "29. История чата",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, одно сообщение\", () => {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json()).to.have.lengthOf(1);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/messages?subjectId={{aliceId}}"
+      }
+    },
+    {
+      "name": "30. Личная подписка на Алису",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}/subscribe"
+      }
+    },
+    {
+      "name": "31. Теперь подписан лично",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"subscribed=true\", () => pm.expect(pm.response.json().subscribed).to.be.true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}/subscribe"
+      }
+    },
+    {
+      "name": "32. Группа по id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/groups/{{groupId}}"
+      }
+    },
+    {
+      "name": "33. Участники группы (на Д6 станет списком пользователей — поправишь проверку)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, Алиса среди участников\", () => {",
+              "    pm.response.to.have.status(200);",
+              "    pm.expect(pm.response.json()).to.include(Number(pm.collectionVariables.get(\"aliceId\")));",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/groups/{{groupId}}/members"
+      }
+    },
+    {
+      "name": "34. Группы Алисы (карточка друга)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, одна группа\", () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/groups?memberId={{aliceId}}"
+      }
+    },
+    {
+      "name": "35. Поиск группы по названию",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200, нашлась\", () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/groups?name={{groupName}}"
+      }
+    },
+    {
+      "name": "36. Импорт не-админом → 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users/import",
+        "body": {
+          "mode": "raw",
+          "raw": "[{\"name\": \"Импорт\", \"birthday\": \"2001-01-01\", \"username\": \"imp_{{$timestamp}}\", \"password\": \"secret\"}]",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "37. Отписка от Алисы",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}/subscribe"
+      }
+    },
+    {
+      "name": "38. Отписка от группы",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/groups/{{groupId}}/subscribe"
+      }
+    },
+    {
+      "name": "39. Удалить чужой аккаунт → 403",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"403\", () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}"
+      }
+    },
+    {
+      "name": "40. Неизвестный подпуть при удалении → 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/users/{{bobId}}/whatever"
+      }
+    },
+    {
+      "name": "41. Боб удаляет свой аккаунт",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/users/{{bobId}}"
+      }
+    },
+    {
+      "name": "42. Логин Алисы для уборки",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{host}}/users/login",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\": \"{{aliceUsername}}\", \"password\": \"secret\"}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "43. Алиса удаляет свою группу",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/groups/{{groupId}}"
+      }
+    },
+    {
+      "name": "44. Алиса удаляет свой подарок",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/gifts/{{giftId}}"
+      }
+    },
+    {
+      "name": "45. Алиса удаляет аккаунт",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204\", () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{host}}/users/{{aliceId}}"
+      }
+    },
+    {
+      "name": "46. Сессия после удаления аккаунта недействительна → 401",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"401\", () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{host}}/users"
+      }
+    }
+  ]
+}
