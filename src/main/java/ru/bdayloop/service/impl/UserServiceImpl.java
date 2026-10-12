@@ -2,10 +2,11 @@ package ru.bdayloop.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.bdayloop.dao.i.SubscriptionDao;
-import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
+import ru.bdayloop.repository.UserRepository;
 import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.service.validation.Validation;
@@ -17,11 +18,12 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class UserServiceImpl implements UserService {
-    private final UserDao userDao;
+    private final UserRepository userRepository;
     private final SubscriptionDao subscriptionDao;
-    public UserServiceImpl(UserDao userDao, SubscriptionDao subscriptionDao) {
-        this.userDao =userDao;
+    public UserServiceImpl(UserRepository userRepository, SubscriptionDao subscriptionDao){
+        this.userRepository = userRepository;
         this.subscriptionDao = subscriptionDao;
     }
 
@@ -29,28 +31,29 @@ public class UserServiceImpl implements UserService {
     public User register(User user, String plainPassword) throws SQLException{
         validateProfile(user.getName(), user.getBirthday(), user.getUsername());
         Validation.requireText(plainPassword, "Пароль не может быть пустым");
-        if(userDao.findByUsername(user.getUsername()).isPresent()){
+        if(userRepository.findByUsername(user.getUsername()).isPresent()){
             throw new ConflictException("Логин «" + user.getUsername() + "» уже занят");
         }
 
         String hash = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
         User toCreateUser = new User(
-                0,
+                null,
                 user.getName(),
                 user.getBirthday(),
                 user.getUsername(),
                 hash,
                 user.getRole()
         );
-        return userDao.create(toCreateUser);
+        return userRepository.save(toCreateUser);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User login(String username, String plainPassword) throws SQLException{
         Validation.requireText(username, "Введите логин");
         Validation.requireText(plainPassword, "Введите пароль");
 
-        Optional<User> found = userDao.findByUsername(username);
+        Optional<User> found = userRepository.findByUsername(username);
         if(found.isEmpty() || !BCrypt.checkpw(plainPassword, found.get().getPasswordHash())){
             throw new UnauthorizedException("Неверный логин или пароль");
         }
@@ -58,18 +61,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User findById(int id) throws SQLException{
-        return userDao.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id "+ id+" не найден"));
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id "+ id+" не найден"));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> findByName(String name) throws SQLException{
-        return userDao.findByName(name);
+        return userRepository.search(name);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User findByUsername(String username) throws SQLException{
-        return userDao.findByUsername(username).orElseThrow(() -> new NotFoundException("Пользователь с username "+ username+" не найден")) ;
+        return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Пользователь с username "+ username+" не найден")) ;
     }
 
     @Override
@@ -78,13 +84,15 @@ public class UserServiceImpl implements UserService {
             throw new ForbiddenException("Можно редактировать только свой профиль");
         }
         validateProfile(user.getName(), user.getBirthday(), user.getUsername());
-        Optional<User> sameUsername = userDao.findByUsername(user.getUsername());
+        Optional<User> sameUsername = userRepository.findByUsername(user.getUsername());
         if(sameUsername.isPresent() && !sameUsername.get().getId().equals(user.getId())){
             throw new ConflictException("Логин «" + user.getUsername() + "» уже занят");
         }
 
-        userDao.update(user);
-        return user;
+        User managed = userRepository.findById(user.getId())
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + user.getId() + " не найден"));
+        managed.updateProfile(user.getName(), user.getBirthday(), user.getUsername());
+        return managed;
     }
 
     @Override
@@ -92,7 +100,9 @@ public class UserServiceImpl implements UserService {
         if(id != requesterId){
             throw new ForbiddenException("Можно удалить только свой аккаунт");
         }
-        userDao.delete(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден"));
+        userRepository.delete(user);
     }
 
     @Override
@@ -118,6 +128,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException{
         return subscriptionDao.isSubscribedDirectly(subscriberId, targetId);
     }

@@ -3,23 +3,20 @@ package ru.bdayloop.dao.impl;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.bdayloop.dao.i.GroupDao;
-import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GroupDaoImplTest extends DaoTestBase {
 
     @Autowired
     GroupDao groupDao;
-    @Autowired
-    UserDao userDao;
 
     @Test
     void createAndFindById_returnsSameGroup() throws SQLException {
@@ -32,7 +29,7 @@ class GroupDaoImplTest extends DaoTestBase {
 
     @Test
     void findByMember_returnsGroupUserJoined() throws SQLException {
-        User user = userDao.create(new User(0, "Катя", LocalDate.of(2000, 1, 1), "kate", "hash", User.Role.USER));
+        User user = createUser("kate");
         Group group = groupDao.create(new Group(0, "Клуб", null));
 
         groupDao.joinGroup(user.getId(), group.getId());
@@ -55,9 +52,5 @@ class GroupDaoImplTest extends DaoTestBase {
 
         assertEquals(1, groups.size());
         assertEquals("Клуб", groups.get(0).getName());
-    }
-
-    private User createUser(String username) throws SQLException {
-        return userDao.create(new User(0, username, LocalDate.of(2000, 1, 1), username, "hash", User.Role.USER));
     }
 }

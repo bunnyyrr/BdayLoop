@@ -4,12 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.bdayloop.dao.i.GroupDao;
 import ru.bdayloop.dao.i.SubscriptionDao;
-import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,8 +17,6 @@ public class SubscriptionDaoImplTest extends DaoTestBase{
     SubscriptionDao subscriptionDao;
     @Autowired
     GroupDao groupDao;
-    @Autowired
-    UserDao userDao;
 
     @Test
     void isSubscribedDirectlyOrViaGroup_directSubscription_returnsTrue() throws SQLException {
@@ -74,9 +70,5 @@ public class SubscriptionDaoImplTest extends DaoTestBase{
         subscriptionDao.subscribe(anya.getId(), kate.getId());
 
         assertTrue(subscriptionDao.isSubscribedDirectly(anya.getId(), kate.getId()));
-    }
-
-    private User createUser(String username) throws SQLException {
-        return userDao.create(new User(0, username, LocalDate.of(2000, 1, 1), username, "hash", User.Role.USER));
     }
 }

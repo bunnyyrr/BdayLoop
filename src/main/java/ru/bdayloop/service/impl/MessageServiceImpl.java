@@ -3,7 +3,6 @@ package ru.bdayloop.service.impl;
 import org.springframework.stereotype.Service;
 import ru.bdayloop.dao.i.MessageDao;
 import ru.bdayloop.dao.i.SubscriptionDao;
-import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.model.Message;
 import ru.bdayloop.service.i.MessageService;

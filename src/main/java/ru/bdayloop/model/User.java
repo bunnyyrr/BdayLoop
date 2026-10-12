@@ -25,7 +25,7 @@ public class User {
 
     protected User(){}
 
-    public User (int id, String name, LocalDate birthday,
+    public User (Integer id, String name, LocalDate birthday,
                  String username, String passwordHash, Role role){
         this.id =id;
         this.name =name;
@@ -56,5 +56,11 @@ public class User {
     }
     public LocalDate getBirthday(){
         return birthday;
+    }
+
+    public void updateProfile(String name, LocalDate birthday, String username){
+        this.name=name;
+        this.birthday= birthday;
+        this.username= username;
     }
 }
