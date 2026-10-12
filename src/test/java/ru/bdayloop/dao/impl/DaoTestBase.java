@@ -5,13 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.bdayloop.config.AppConfig;
+import ru.bdayloop.model.User;
+import ru.bdayloop.repository.UserRepository;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 
 @SpringJUnitConfig(AppConfig.class)
 abstract class DaoTestBase {
@@ -30,6 +35,10 @@ abstract class DaoTestBase {
 
     @Autowired
     DataSource dataSource;
+    @Autowired
+    UserRepository userRepository;
+    @Autowired
+    PlatformTransactionManager transactionManager;
 
     @BeforeEach
     void cleanTables() throws SQLException{
@@ -37,5 +46,9 @@ abstract class DaoTestBase {
             Statement st = conn.createStatement()){
             st.execute("TRUNCATE TABLE users CASCADE");
         }
+    }
+
+    User createUser(String username){
+        return new TransactionTemplate(transactionManager).execute(status -> userRepository.save(new User(null, username, LocalDate.of(200, 1, 1), username, "hash", User.Role.USER)));
     }
 }
