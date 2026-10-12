@@ -100,26 +100,6 @@ public class UserDaoImpl implements UserDao {
             }
         }
     }
-    public void subscribe(int subscriberId, int targetId) throws SQLException{
-        String sql = "INSERT INTO subscriptions(subscriber_id, target_id) VALUES(?,?)";
-        try(Connection conn = dataSource.getConnection();
-        PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, subscriberId);
-            ps.setInt(2, targetId);
-            ps.executeUpdate();
-        }
-    }
-
-    public void unsubscribe(int subscriberId, int targetId) throws SQLException{
-        String sql = "DELETE FROM subscriptions WHERE subscriber_id=? AND target_id=?";
-
-        try(Connection conn = dataSource.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, subscriberId);
-            ps.setInt(2, targetId);
-            ps.executeUpdate();
-        }
-    }
 
     public List<User> findByName(String name) throws SQLException{
         String sql = "SELECT id, name, birthday, username, password_hash, role FROM users WHERE name ILIKE ? OR username ILIKE ? OR CAST(id AS TEXT) ILIKE ?";
@@ -136,45 +116,6 @@ public class UserDaoImpl implements UserDao {
                     result.add(mapRow(rs));
                 }
                 return result;
-            }
-        }
-    }
-
-    public boolean isSubscribedDirectlyOrViaGroup(int subscriberId, int targetId) throws SQLException{
-        String sql = """
-            SELECT EXISTS (
-                SELECT 1 FROM subscriptions WHERE subscriber_id = ? AND target_id = ?
-            ) OR EXISTS (
-                SELECT 1 FROM group_subscriptions gs
-                JOIN group_members gm ON gm.group_id = gs.group_id
-                WHERE gs.subscriber_id = ? AND gm.user_id = ?
-            )
-            """;
-
-        try(Connection conn= dataSource.getConnection();
-        PreparedStatement ps =conn.prepareStatement(sql)){
-            ps.setInt(1, subscriberId);
-            ps.setInt(2, targetId);
-            ps.setInt(3, subscriberId);
-            ps.setInt(4, targetId);
-
-            try(ResultSet rs = ps.executeQuery()){
-                rs.next();
-                return rs.getBoolean(1);
-            }
-        }
-    }
-
-    public boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException{
-        String sql = "SELECT 1 FROM subscriptions WHERE subscriber_id = ? AND target_id = ?";
-
-        try(Connection conn = dataSource.getConnection();
-            PreparedStatement ps = conn.prepareStatement(sql)){
-            ps.setInt(1, subscriberId);
-            ps.setInt(2, targetId);
-
-            try(ResultSet rs = ps.executeQuery()){
-                return rs.next();
             }
         }
     }

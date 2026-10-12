@@ -42,44 +42,6 @@ class GroupDaoImplTest extends DaoTestBase {
         assertEquals("Клуб", groups.get(0).getName());
     }
 
-    @Test
-    void isSubscribedDirectlyOrViaGroup_directSubscription_returnsTrue() throws SQLException {
-        User anya = createUser("anya");
-        User kate = createUser("kate");
-        userDao.subscribe(anya.getId(), kate.getId());
-
-        assertTrue(userDao.isSubscribedDirectlyOrViaGroup(anya.getId(), kate.getId()));
-    }
-
-    @Test
-    void isSubscribedDirectlyOrViaGroup_viaGroupSubscription_returnsTrue() throws SQLException {
-        User anya = createUser("anya");
-        User kate = createUser("kate");
-        Group group = groupDao.create(new Group(0, "972501 ТГУ", null));
-        groupDao.joinGroup(kate.getId(), group.getId());
-        groupDao.subscribeToGroup(anya.getId(), group.getId());
-
-        assertTrue(userDao.isSubscribedDirectlyOrViaGroup(anya.getId(), kate.getId()));
-    }
-
-    @Test
-    void isSubscribedDirectlyOrViaGroup_onlyMembershipWithoutSubscription_returnsFalse() throws SQLException {
-        User anya = createUser("anya");
-        User kate = createUser("kate");
-        Group group = groupDao.create(new Group(0, "972501 ТГУ", null));
-        groupDao.joinGroup(kate.getId(), group.getId());
-        groupDao.joinGroup(anya.getId(), group.getId());
-
-        assertFalse(userDao.isSubscribedDirectlyOrViaGroup(anya.getId(), kate.getId()));
-    }
-
-    @Test
-    void isSubscribedDirectlyOrViaGroup_noSubscription_returnsFalse() throws SQLException {
-        User anya = createUser("anya");
-        User kate = createUser("kate");
-
-        assertFalse(userDao.isSubscribedDirectlyOrViaGroup(anya.getId(), kate.getId()));
-    }
 
     @Test
     void findBySubscriber_returnsOnlySubscribedGroups() throws SQLException {
@@ -93,21 +55,6 @@ class GroupDaoImplTest extends DaoTestBase {
 
         assertEquals(1, groups.size());
         assertEquals("Клуб", groups.get(0).getName());
-    }
-
-    @Test
-    void isSubscribedDirectly_ignoresGroupSubscription() throws SQLException {
-        User anya = createUser("anya");
-        User kate = createUser("kate");
-        Group group = groupDao.create(new Group(0, "Клуб", null));
-        groupDao.joinGroup(kate.getId(), group.getId());
-        groupDao.subscribeToGroup(anya.getId(), group.getId());
-
-        assertFalse(userDao.isSubscribedDirectly(anya.getId(), kate.getId()));
-
-        userDao.subscribe(anya.getId(), kate.getId());
-
-        assertTrue(userDao.isSubscribedDirectly(anya.getId(), kate.getId()));
     }
 
     private User createUser(String username) throws SQLException {

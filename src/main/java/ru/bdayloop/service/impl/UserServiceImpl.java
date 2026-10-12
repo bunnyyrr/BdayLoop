@@ -2,6 +2,7 @@ package ru.bdayloop.service.impl;
 
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
+import ru.bdayloop.dao.i.SubscriptionDao;
 import ru.bdayloop.dao.i.UserDao;
 import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
@@ -18,8 +19,10 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
     private final UserDao userDao;
-    public UserServiceImpl(UserDao userDao){
+    private final SubscriptionDao subscriptionDao;
+    public UserServiceImpl(UserDao userDao, SubscriptionDao subscriptionDao) {
         this.userDao =userDao;
+        this.subscriptionDao = subscriptionDao;
     }
 
     @Override
@@ -76,7 +79,7 @@ public class UserServiceImpl implements UserService {
         }
         validateProfile(user.getName(), user.getBirthday(), user.getUsername());
         Optional<User> sameUsername = userDao.findByUsername(user.getUsername());
-        if(sameUsername.isPresent() && sameUsername.get().getId() != user.getId()){
+        if(sameUsername.isPresent() && !sameUsername.get().getId().equals(user.getId())){
             throw new ConflictException("Логин «" + user.getUsername() + "» уже занят");
         }
 
@@ -97,12 +100,12 @@ public class UserServiceImpl implements UserService {
         if(subscriberId == targetId){
             throw new BadRequestException("Нельзя подписаться на себя");
         }
-        userDao.subscribe(subscriberId, targetId);
+        subscriptionDao.subscribe(subscriberId, targetId);
     }
 
     @Override
     public void unsubscribe(int subscriberId, int targetId) throws SQLException{
-        userDao.unsubscribe(subscriberId, targetId);
+        subscriptionDao.unsubscribe(subscriberId, targetId);
     }
 
     @Override
@@ -116,7 +119,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException{
-        return userDao.isSubscribedDirectly(subscriberId, targetId);
+        return subscriptionDao.isSubscribedDirectly(subscriberId, targetId);
     }
 
     private void validateProfile(String name, LocalDate birthday, String username){
