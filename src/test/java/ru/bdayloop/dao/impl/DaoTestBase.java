@@ -10,7 +10,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.bdayloop.config.AppConfig;
 import ru.bdayloop.model.User;
-import ru.bdayloop.repository.UserRepository;
+import ru.bdayloop.repository.i.UserRepository;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

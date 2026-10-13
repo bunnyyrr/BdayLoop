@@ -29,8 +29,7 @@ public class GiftServlet extends HttpServlet {
             CreateGiftRequest body = JsonUtil.readBody(req, CreateGiftRequest.class);
             int userId = SessionUtil.requireUserId(req);
 
-            Gift newGift = new Gift(0, userId, body.title());
-            Gift created = giftService.create(newGift);
+            Gift created = giftService.create(userId, body.title());
             resp.setStatus(HttpServletResponse.SC_CREATED);
             JsonUtil.writeBody(resp, GiftResponse.from(created));
         } catch (Exception e) {

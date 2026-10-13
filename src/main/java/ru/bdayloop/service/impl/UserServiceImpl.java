@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.bdayloop.dao.i.SubscriptionDao;
 import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
-import ru.bdayloop.repository.UserRepository;
+import ru.bdayloop.repository.i.UserRepository;
 import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.service.validation.Validation;

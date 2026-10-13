@@ -1,4 +1,4 @@
-package ru.bdayloop.repository;
+package ru.bdayloop.repository.i;
 
 import ru.bdayloop.model.User;
 

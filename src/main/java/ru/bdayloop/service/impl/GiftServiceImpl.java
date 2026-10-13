@@ -1,41 +1,50 @@
 package ru.bdayloop.service.impl;
 
 import org.springframework.stereotype.Service;
-import ru.bdayloop.dao.i.GiftDao;
+import org.springframework.transaction.annotation.Transactional;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Gift;
+import ru.bdayloop.model.User;
+import ru.bdayloop.repository.i.GiftRepository;
+import ru.bdayloop.repository.i.UserRepository;
 import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.service.validation.Validation;
 
-import java.sql.SQLException;
 import java.util.List;
 
 @Service
+@Transactional
 public class GiftServiceImpl implements GiftService {
-    private final GiftDao giftDao;
-    public GiftServiceImpl(GiftDao giftDao){
-        this.giftDao= giftDao;
+    private final GiftRepository giftRepository;
+    private final UserRepository userRepository;
+
+    public GiftServiceImpl(GiftRepository giftRepository, UserRepository userRepository){
+        this.giftRepository= giftRepository;
+        this.userRepository = userRepository;
     }
 
     @Override
-    public Gift create(Gift gift) throws SQLException{
-        Validation.requireText(gift.getTitle(), "Название подарка не может быть пустым");
-        return giftDao.create(gift);
+    public Gift create(int ownerId, String title){
+        Validation.requireText(title, "Название подарка не может быть пустым");
+        User owner = userRepository.findById(ownerId).orElseThrow(() -> new NotFoundException("Пользователь с id " + ownerId + " не найден"));
+        return giftRepository.save(new Gift(owner, title));
     }
 
     @Override
-    public void delete(int id, int requesterId) throws SQLException {
-        Gift gift = giftDao.findById(id)
+    public void delete(int id, int requesterId) {
+        Gift gift = giftRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Подарок с id " + id + " не найден"));
-        if (gift.getUserId() != requesterId) {
+        if (!gift.getOwner().getId().equals(requesterId)) {
             throw new ForbiddenException("Можно удалить только свой подарок");
         }
-        giftDao.delete(id);
+        giftRepository.delete(gift);
     }
 
+
     @Override
-    public List<Gift> findByUserId(int userId) throws SQLException{
-        return giftDao.findByUserId(userId);
+    @Transactional(readOnly = true)
+    public List<Gift> findByUserId(int userId) {
+        return giftRepository.findByOwnerId(userId);
     }
 }

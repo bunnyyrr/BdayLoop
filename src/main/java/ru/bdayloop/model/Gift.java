@@ -1,22 +1,34 @@
 package ru.bdayloop.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name= "gifts")
 public class Gift {
-    private int id;
-    private int userId;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne(fetch= FetchType.LAZY, optional = false)
+    @JoinColumn(name= "user_id", nullable = false)
+    private User owner;
+
     private String title;
 
-    public Gift(int id, int userId, String title){
-        this.id =id;
-        this.userId=userId;
+    protected Gift() {}
+
+    public Gift(User owner, String title){
+        this.owner=owner;
         this.title = title;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public int getUserId() {
-        return userId;
+    public User getOwner() {
+        return owner;
     }
 
     public String getTitle() {
