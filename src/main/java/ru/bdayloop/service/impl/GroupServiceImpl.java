@@ -1,11 +1,15 @@
 package ru.bdayloop.service.impl;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.bdayloop.dao.i.GroupDao;
+import ru.bdayloop.exception.ConflictException;
 import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
+import ru.bdayloop.repository.i.GroupRepository;
+import ru.bdayloop.repository.i.UserRepository;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.service.validation.Validation;
 
@@ -13,37 +17,50 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Service
+@Transactional
 public class GroupServiceImpl implements GroupService {
     private final GroupDao groupDao;
-    public GroupServiceImpl (GroupDao groupDao){
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
+
+    public GroupServiceImpl (GroupRepository groupRepository, UserRepository userRepository, GroupDao groupDao){
+        this.groupRepository=groupRepository;
+        this.userRepository= userRepository;
         this.groupDao = groupDao;
     }
 
     @Override
-    public void delete(int groupId, int requesterId, User.Role requesterRole) throws SQLException{
-        permissionCheck(groupId, requesterId, requesterRole);
-        groupDao.delete(groupId);
+    public void delete(int groupId, int requesterId, User.Role requesterRole) {
+        Group group= permissionCheck(groupId, requesterId, requesterRole);
+        groupRepository.delete(group);
     }
 
     @Override
-    public Group create(Group group) throws SQLException{
-        Validation.requireText(group.getName(), "Название группы не может быть пустым");
-        return groupDao.create(group);
+    public Group create(String name, int creatorId){
+        Validation.requireText(name, "Название группы не может быть пустым");
+        if(groupRepository.existsByName(name)){
+            throw new ConflictException("Группа с названием «" + name + "» уже существует");
+        }
+        User creator= userRepository.findById(creatorId).orElseThrow(() -> new NotFoundException("Пользователь с id " + creatorId + " не найден"));
+        return groupRepository.save(new Group(name, creator));
     }
 
     @Override
-    public Group findById(int id) throws SQLException{
-        return groupDao.findById(id).orElseThrow(()-> new NotFoundException("Группа с id "+ id + " не найдена"));
+    @Transactional(readOnly = true)
+    public Group findById(int id){
+        return groupRepository.findById(id).orElseThrow(()-> new NotFoundException("Группа с id "+ id + " не найдена"));
     }
 
     @Override
-    public List<Group> findByName(String name) throws SQLException{
-        return groupDao.findByName(name);
+    @Transactional(readOnly = true)
+    public List<Group> findByName(String name){
+        return groupRepository.findByNameContaining(name);
     }
 
     @Override
-    public List<Group> findAll() throws SQLException{
-        return groupDao.findAll();
+    @Transactional(readOnly = true)
+    public List<Group> findAll(){
+        return groupRepository.findAll();
     }
 
     @Override
@@ -57,6 +74,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Integer> groupMembers(int groupId) throws SQLException {
         return groupDao.groupMembers(groupId);
     }
@@ -72,27 +90,32 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public Group update(int groupId, String newName, int requesterId, User.Role requesterRole) throws SQLException{
+    public Group update(int groupId, String newName, int requesterId, User.Role requesterRole){
         Group group = permissionCheck(groupId, requesterId, requesterRole);
         Validation.requireText(newName, "Название группы не может быть пустым");
-        Group updated = new Group(group.getId(), newName, group.getCreatedBy());
-        groupDao.update(updated);
-        return updated;
+        if(!newName.equals(group.getName()) && groupRepository.existsByName(newName)){
+            throw new ConflictException("Группа с названием «" + newName + "» уже существует");
+        }
+
+        group.rename(newName);
+        return group;
     }
 
     @Override
-    public List<Group> findByMember(int userId) throws SQLException{
-        return groupDao.findByMember(userId);
+    @Transactional(readOnly = true)
+    public List<Group> findByMember(int userId){
+        return groupRepository.findByMember(userId);
     }
 
     @Override
-    public List<Group> findBySubscriber(int subscriberId) throws SQLException{
-        return groupDao.findBySubscriber(subscriberId);
+    @Transactional(readOnly = true)
+    public List<Group> findBySubscriber(int subscriberId){
+        return groupRepository.findBySubscriber(subscriberId);
     }
 
-    private Group permissionCheck(int groupId, int requesterId, User.Role requesterRole) throws SQLException{
+    private Group permissionCheck(int groupId, int requesterId, User.Role requesterRole){
         Group group = findById(groupId);
-        boolean isCreator = group.getCreatedBy() != null && group.getCreatedBy() == requesterId;
+        boolean isCreator = group.getCreatedBy() != null && group.getCreatedBy().getId().equals(requesterId);
         if(!isCreator && requesterRole!=User.Role.ADMIN){
             throw new ForbiddenException("Управлять группой может только её создатель или администратор");
         }

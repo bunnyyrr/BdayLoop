@@ -9,7 +9,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.postgresql.PostgreSQLContainer;
 import ru.bdayloop.config.AppConfig;
+import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
+import ru.bdayloop.repository.i.GroupRepository;
 import ru.bdayloop.repository.i.UserRepository;
 
 import javax.sql.DataSource;
@@ -38,6 +40,8 @@ abstract class DaoTestBase {
     @Autowired
     UserRepository userRepository;
     @Autowired
+    GroupRepository groupRepository;
+    @Autowired
     PlatformTransactionManager transactionManager;
 
     @BeforeEach
@@ -50,5 +54,9 @@ abstract class DaoTestBase {
 
     User createUser(String username){
         return new TransactionTemplate(transactionManager).execute(status -> userRepository.save(new User(null, username, LocalDate.of(200, 1, 1), username, "hash", User.Role.USER)));
+    }
+
+    Group createGroup(String name){
+        return new TransactionTemplate(transactionManager).execute(status -> groupRepository.save(new Group(name, null)));
     }
 }

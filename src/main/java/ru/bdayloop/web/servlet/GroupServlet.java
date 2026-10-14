@@ -31,8 +31,7 @@ public class GroupServlet extends HttpServlet {
             if(pathInfo ==null || pathInfo.equals("/")){
                 CreateGroupRequest body = JsonUtil.readBody(req, CreateGroupRequest.class);
                 int creatorId = SessionUtil.requireUserId(req);
-                Group newGroup = new Group(0, body.name(), creatorId);
-                Group created = groupService.create(newGroup);
+                Group created = groupService.create(body.name(), creatorId);
                 resp.setStatus(HttpServletResponse.SC_CREATED);
                 JsonUtil.writeBody(resp, GroupResponse.from(created));
             }

@@ -31,7 +31,7 @@ public class SubscriptionDaoImplTest extends DaoTestBase{
     void isSubscribedDirectlyOrViaGroup_viaGroupSubscription_returnsTrue() throws SQLException {
         User anya = createUser("anya");
         User kate = createUser("kate");
-        Group group = groupDao.create(new Group(0, "972501 ТГУ", null));
+        Group group = createGroup("972501 ТГУ");
         groupDao.joinGroup(kate.getId(), group.getId());
         groupDao.subscribeToGroup(anya.getId(), group.getId());
 
@@ -42,7 +42,7 @@ public class SubscriptionDaoImplTest extends DaoTestBase{
     void isSubscribedDirectlyOrViaGroup_onlyMembershipWithoutSubscription_returnsFalse() throws SQLException {
         User anya = createUser("anya");
         User kate = createUser("kate");
-        Group group = groupDao.create(new Group(0, "972501 ТГУ", null));
+        Group group = createGroup("972501 ТГУ");
         groupDao.joinGroup(kate.getId(), group.getId());
         groupDao.joinGroup(anya.getId(), group.getId());
 
@@ -61,7 +61,7 @@ public class SubscriptionDaoImplTest extends DaoTestBase{
     void isSubscribedDirectly_ignoresGroupSubscription() throws SQLException {
         User anya = createUser("anya");
         User kate = createUser("kate");
-        Group group = groupDao.create(new Group(0, "Клуб", null));
+        Group group = createGroup("Клуб");
         groupDao.joinGroup(kate.getId(), group.getId());
         groupDao.subscribeToGroup(anya.getId(), group.getId());
 
