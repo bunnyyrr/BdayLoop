@@ -27,8 +27,8 @@ public class MessageServlet extends HttpServlet {
         try {
             SendMessageRequest body = JsonUtil.readBody(req, SendMessageRequest.class);
             int senderId = SessionUtil.requireUserId(req);
-            Message newMessage = new Message(0, body.subjectId(), senderId, body.text(), null);
-            Message created = messageService.sendMessage(newMessage);
+
+            Message created = messageService.sendMessage(body.subjectId(), senderId, body.text());
             resp.setStatus(HttpServletResponse.SC_CREATED);
             JsonUtil.writeBody(resp, MessageResponse.from(created));
         } catch (Exception e) {

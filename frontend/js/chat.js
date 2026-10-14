@@ -33,7 +33,8 @@ async function loadMessages() {
     el.replaceChildren(...messages.map(m => {
         const p = document.createElement("p");
         const who = document.createElement("strong");
-        who.textContent = (m.senderId === me.id ? "Вы" : m.senderId) + ": ";
+        const author = m.senderId === null ? "аккаунт удален" : (m.senderId === me.id ? "Вы" : m.senderId);
+        who.textContent = author + ": ";
         p.append(who, m.text);
         return p;
     }));    el.scrollTop = el.scrollHeight;

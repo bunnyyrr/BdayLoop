@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bdayloop.model.User;
-import ru.bdayloop.repository.UserRepository;
+import ru.bdayloop.repository.i.UserRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;

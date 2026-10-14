@@ -1,15 +1,16 @@
-package ru.bdayloop.repository;
+package ru.bdayloop.repository.jpa;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import ru.bdayloop.model.User;
+import ru.bdayloop.repository.i.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class JpaUserRepository implements UserRepository{
+public class JpaUserRepository implements UserRepository {
 
     @PersistenceContext
     private EntityManager em;

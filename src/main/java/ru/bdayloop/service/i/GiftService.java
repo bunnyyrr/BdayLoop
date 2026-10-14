@@ -2,11 +2,10 @@ package ru.bdayloop.service.i;
 
 import ru.bdayloop.model.Gift;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface GiftService {
-    Gift create(Gift gift) throws SQLException;
-    void delete(int id, int requesterId) throws SQLException;
-    List<Gift> findByUserId(int userId) throws SQLException;
+    Gift create(int ownerId, String title);
+    void delete(int id, int requesterId);
+    List<Gift> findByUserId(int userId);
 }

@@ -1,17 +1,29 @@
 package ru.bdayloop.model;
 
-public class Group {
-    private int id;
-    private String name;
-    private Integer createdBy;
+import jakarta.persistence.*;
 
-    public Group(int id, String name, Integer createdBy){
-        this.id=id;
+@Entity
+@Table(name="groups")
+public class Group {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String name;
+
+    @ManyToOne(fetch= FetchType.LAZY)
+    @JoinColumn(name= "created_by")
+    private User createdBy;
+
+    protected Group() {}
+
+    public Group(String name, User createdBy){
         this.name=name;
         this.createdBy = createdBy;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
@@ -19,7 +31,11 @@ public class Group {
         return name;
     }
 
-    public Integer getCreatedBy() {
+    public User getCreatedBy() {
         return createdBy;
+    }
+
+    public void rename(String newName){
+        this.name= newName;
     }
 }
