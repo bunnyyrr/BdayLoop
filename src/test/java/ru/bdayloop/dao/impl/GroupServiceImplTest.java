@@ -11,13 +11,9 @@ import ru.bdayloop.model.User;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.service.i.UserService;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GroupServiceImplTest extends DaoTestBase {
 
@@ -110,7 +106,7 @@ class GroupServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void delete_byCreator_removesGroupWithItsMembers() throws SQLException {
+    void delete_byCreator_removesGroupWithItsMembers()  {
         User kate = createUser("kate");
         Group group = groupService.create("Клуб", kate.getId());
         groupService.joinGroup(kate.getId(), group.getId());
@@ -122,7 +118,7 @@ class GroupServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void deletingCreator_keepsGroupWithoutCreator() throws SQLException {
+    void deletingCreator_keepsGroupWithoutCreator()  {
         User kate = createUser("kate");
         User anya = createUser("anya");
         Group group = groupService.create("Клуб", kate.getId());
@@ -136,7 +132,7 @@ class GroupServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void joinAndSubscribe_areVisibleThroughFindBy() throws SQLException {
+    void joinAndSubscribe_areVisibleThroughFindBy()  {
         User kate = createUser("kate");
         Group club = groupService.create("Клуб", kate.getId());
         Group team = groupService.create("Сборная", kate.getId());
@@ -151,5 +147,74 @@ class GroupServiceImplTest extends DaoTestBase {
         assertEquals(1, subscribed.size());
         assertEquals("Сборная", subscribed.get(0).getName());
         assertEquals(List.of(kate.getId()), groupService.groupMembers(club.getId()));
+    }
+
+    @Test
+    void joinGroup_twice_isConflict() {
+        User kate = createUser("kate");
+        Group club = groupService.create("Клуб", kate.getId());
+        groupService.joinGroup(kate.getId(), club.getId());
+
+        assertThrows(ConflictException.class, () -> groupService.joinGroup(kate.getId(), club.getId()));
+    }
+
+    @Test
+    void joinGroup_unknownGroupOrUser_isNotFound() {
+        User kate = createUser("kate");
+        Group club = groupService.create("Клуб", kate.getId());
+
+        assertThrows(NotFoundException.class, () -> groupService.joinGroup(kate.getId(), 999));
+        assertThrows(NotFoundException.class, () -> groupService.joinGroup(999, club.getId()));
+    }
+
+    @Test
+    void leaveGroup_removesMembership_andIsSilentWhenNotMember() {
+        User kate = createUser("kate");
+        Group club = groupService.create("Клуб", kate.getId());
+        groupService.joinGroup(kate.getId(), club.getId());
+
+        groupService.leaveGroup(club.getId(), kate.getId());
+        groupService.leaveGroup(club.getId(), kate.getId());
+
+        assertTrue(groupService.groupMembers(club.getId()).isEmpty());
+    }
+
+    @Test
+    void subscribeToGroup_twice_isConflict_andUnsubscribeWorks() {
+        User kate = createUser("kate");
+        Group club = groupService.create("Клуб", kate.getId());
+        groupService.subscribeToGroup(kate.getId(), club.getId());
+
+        assertThrows(ConflictException.class, () -> groupService.subscribeToGroup(kate.getId(), club.getId()));
+
+        groupService.unsubscribeFromGroup(kate.getId(), club.getId());
+        assertTrue(groupService.findBySubscriber(kate.getId()).isEmpty());
+    }
+
+    @Test
+    void deletingGroup_removesMembershipsAndSubscriptions() {
+        User kate = createUser("kate");
+        User anya = createUser("anya");
+        Group club = groupService.create("Клуб", kate.getId());
+        groupService.joinGroup(anya.getId(), club.getId());
+        groupService.subscribeToGroup(anya.getId(), club.getId());
+
+        groupService.delete(club.getId(), kate.getId(), User.Role.USER);
+
+        assertTrue(groupService.findByMember(anya.getId()).isEmpty());
+        assertTrue(groupService.findBySubscriber(anya.getId()).isEmpty());
+    }
+
+    @Test
+    void deletingUser_removesHisMembershipsAndSubscriptions() {
+        User kate = createUser("kate");
+        User anya = createUser("anya");
+        Group club = groupService.create("Клуб", kate.getId());
+        groupService.joinGroup(anya.getId(), club.getId());
+        groupService.subscribeToGroup(anya.getId(), club.getId());
+
+        userService.delete(anya.getId(), anya.getId());
+
+        assertTrue(groupService.groupMembers(club.getId()).isEmpty());
     }
 }

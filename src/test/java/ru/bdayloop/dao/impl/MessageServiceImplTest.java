@@ -10,14 +10,9 @@ import ru.bdayloop.repository.i.MessageRepository;
 import ru.bdayloop.service.i.MessageService;
 import ru.bdayloop.service.i.UserService;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MessageServiceImplTest extends DaoTestBase {
 
@@ -46,7 +41,7 @@ class MessageServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void sendMessage_withBlankText_isRejected() throws SQLException {
+    void sendMessage_withBlankText_isRejected()  {
         User birthdayPerson = createUser("birthday");
         User friend = createUser("friend");
         userService.subscribe(friend.getId(), birthdayPerson.getId());
@@ -56,7 +51,7 @@ class MessageServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void sendAndGetMessages_whenSubscribed_works() throws SQLException {
+    void sendAndGetMessages_whenSubscribed_works()  {
         User birthdayPerson = createUser("birthday");
         User friend = createUser("friend");
         userService.subscribe(friend.getId(), birthdayPerson.getId());
@@ -80,7 +75,7 @@ class MessageServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void deletingSender_keepsHisMessagesWithoutAuthor() throws SQLException {
+    void deletingSender_keepsHisMessagesWithoutAuthor()  {
         User birthdayPerson = createUser("birthday");
         User author = createUser("author");
         User reader = createUser("reader");
@@ -97,7 +92,7 @@ class MessageServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void deletingBirthdayPerson_removesTheirChat() throws SQLException {
+    void deletingBirthdayPerson_removesTheirChat()  {
         User birthdayPerson = createUser("birthday");
         User friend = createUser("friend");
         userService.subscribe(friend.getId(), birthdayPerson.getId());

@@ -10,12 +10,9 @@ import ru.bdayloop.model.User;
 import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.service.i.UserService;
 
-import java.sql.SQLException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class GiftServiceImplTest extends DaoTestBase {
 
@@ -67,7 +64,7 @@ class GiftServiceImplTest extends DaoTestBase {
     }
 
     @Test
-    void deletingUser_removesHisGifts() throws SQLException {
+    void deletingUser_removesHisGifts()  {
         User kate = createUser("kate");
         giftService.create(kate.getId(), "Книга");
         giftService.create(kate.getId(), "Кружка");

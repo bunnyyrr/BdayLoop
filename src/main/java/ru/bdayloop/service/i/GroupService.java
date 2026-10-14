@@ -11,12 +11,12 @@ public interface GroupService {
     Group findById(int id);
     List<Group> findByName(String name);
     List<Group> findAll();
-    void joinGroup(int userId, int groupId) throws SQLException;
-    void subscribeToGroup(int subscriberId, int groupId) throws SQLException;
-    List<Integer> groupMembers(int groupId) throws SQLException;
+    void joinGroup(int userId, int groupId) ;
+    void subscribeToGroup(int subscriberId, int groupId) ;
+    List<Integer> groupMembers(int groupId) ;
     void delete(int groupId, int requesterId, User.Role requesterRole);
-    void leaveGroup(int groupId, int userId) throws SQLException;
-    void unsubscribeFromGroup(int subscriberId, int groupId) throws SQLException;
+    void leaveGroup(int groupId, int userId);
+    void unsubscribeFromGroup(int subscriberId, int groupId);
     Group update(int groupId, String newName, int requesterId, User.Role requesterRole);
     List<Group> findByMember(int userId);
     List<Group> findBySubscriber(int subscriberId);

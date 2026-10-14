@@ -45,7 +45,7 @@ abstract class DaoTestBase {
     PlatformTransactionManager transactionManager;
 
     @BeforeEach
-    void cleanTables() throws SQLException{
+    void cleanTables() throws SQLException {
         try(Connection conn = dataSource.getConnection();
             Statement st = conn.createStatement()){
             st.execute("TRUNCATE TABLE users CASCADE");
@@ -53,7 +53,7 @@ abstract class DaoTestBase {
     }
 
     User createUser(String username){
-        return new TransactionTemplate(transactionManager).execute(status -> userRepository.save(new User(null, username, LocalDate.of(200, 1, 1), username, "hash", User.Role.USER)));
+        return new TransactionTemplate(transactionManager).execute(status -> userRepository.save(new User(null, username, LocalDate.of(2000, 1, 1), username, "hash", User.Role.USER)));
     }
 
     Group createGroup(String name){

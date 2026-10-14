@@ -3,15 +3,15 @@ package ru.bdayloop.service.impl;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.bdayloop.dao.i.SubscriptionDao;
 import ru.bdayloop.exception.*;
+import ru.bdayloop.model.Subscription;
 import ru.bdayloop.model.User;
+import ru.bdayloop.repository.i.SubscriptionRepository;
 import ru.bdayloop.repository.i.UserRepository;
 import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.service.validation.Validation;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,14 +21,14 @@ import java.util.Optional;
 @Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
-    private final SubscriptionDao subscriptionDao;
-    public UserServiceImpl(UserRepository userRepository, SubscriptionDao subscriptionDao){
+    private final SubscriptionRepository subscriptionRepository;
+    public UserServiceImpl(UserRepository userRepository, SubscriptionRepository subscriptionRepository){
         this.userRepository = userRepository;
-        this.subscriptionDao = subscriptionDao;
+        this.subscriptionRepository = subscriptionRepository;
     }
 
     @Override
-    public User register(User user, String plainPassword) throws SQLException{
+    public User register(User user, String plainPassword){
         validateProfile(user.getName(), user.getBirthday(), user.getUsername());
         Validation.requireText(plainPassword, "Пароль не может быть пустым");
         if(userRepository.findByUsername(user.getUsername()).isPresent()){
@@ -49,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User login(String username, String plainPassword) throws SQLException{
+    public User login(String username, String plainPassword){
         Validation.requireText(username, "Введите логин");
         Validation.requireText(plainPassword, "Введите пароль");
 
@@ -62,24 +62,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public User findById(int id) throws SQLException{
+    public User findById(int id){
         return userRepository.findById(id).orElseThrow(() -> new NotFoundException("Пользователь с id "+ id+" не найден"));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> findByName(String name) throws SQLException{
+    public List<User> findByName(String name){
         return userRepository.search(name);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public User findByUsername(String username) throws SQLException{
+    public User findByUsername(String username){
         return userRepository.findByUsername(username).orElseThrow(() -> new NotFoundException("Пользователь с username "+ username+" не найден")) ;
     }
 
     @Override
-    public User update(User user, int requesterId) throws SQLException{
+    public User update(User user, int requesterId){
         if(user.getId() != requesterId){
             throw new ForbiddenException("Можно редактировать только свой профиль");
         }
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void delete(int id, int requesterId) throws SQLException{
+    public void delete(int id, int requesterId){
         if(id != requesterId){
             throw new ForbiddenException("Можно удалить только свой аккаунт");
         }
@@ -106,20 +106,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void subscribe(int subscriberId, int targetId) throws SQLException{
+    public void subscribe(int subscriberId, int targetId){
         if(subscriberId == targetId){
             throw new BadRequestException("Нельзя подписаться на себя");
         }
-        subscriptionDao.subscribe(subscriberId, targetId);
+        User subscriber = findExistingUser(subscriberId);
+        User target = findExistingUser(targetId);
+        if(subscriptionRepository.isSubscribedDirectly(subscriberId, targetId)){
+            throw new ConflictException("Вы уже подписаны на этого пользователя");
+        }
+        subscriptionRepository.save(new Subscription(subscriber, target));
     }
 
     @Override
-    public void unsubscribe(int subscriberId, int targetId) throws SQLException{
-        subscriptionDao.unsubscribe(subscriberId, targetId);
+    public void unsubscribe(int subscriberId, int targetId){
+        subscriptionRepository.deleteSubscription(subscriberId, targetId);
     }
 
     @Override
-    public List<User> importUsers(List<UserRegistration> registrations) throws SQLException{
+    public List<User> importUsers(List<UserRegistration> registrations){
         List<User> created = new ArrayList<>();
         for(UserRegistration r : registrations) {
             created.add(register(r.user(), r.password()));
@@ -129,8 +134,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isSubscribedDirectly(int subscriberId, int targetId) throws SQLException{
-        return subscriptionDao.isSubscribedDirectly(subscriberId, targetId);
+    public boolean isSubscribedDirectly(int subscriberId, int targetId){
+        return subscriptionRepository.isSubscribedDirectly(subscriberId, targetId);
+    }
+
+    private User findExistingUser(int id){
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + id + " не найден"));
     }
 
     private void validateProfile(String name, LocalDate birthday, String username){

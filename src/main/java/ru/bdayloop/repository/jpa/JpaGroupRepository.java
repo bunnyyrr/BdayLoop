@@ -52,24 +52,14 @@ public class JpaGroupRepository implements GroupRepository {
 
     @Override
     public List<Group> findByMember(Integer userId){
-        return em.createNativeQuery("""
-                        select g.* from groups g
-                        join group_members gm on gm.group_id = g.id
-                        where gm.user_id = :userId
-                        order by g.id
-                        """, Group.class)
+        return em.createQuery("select m.group from GroupMembership m where m.id.userId= :userId order by m.group.id", Group.class)
                 .setParameter("userId", userId)
                 .getResultList();
     }
 
     @Override
     public List<Group> findBySubscriber(Integer userId) {
-        return em.createNativeQuery("""
-                        select g.* from groups g
-                        join group_subscriptions gs on gs.group_id = g.id
-                        where gs.subscriber_id = :userId
-                        order by g.id
-                        """, Group.class)
+        return em.createQuery("select gs.group from GroupSubscription gs where gs.id.subscriberId = :userId order by gs.group.id", Group.class)
                 .setParameter("userId", userId)
                 .getResultList();
     }
