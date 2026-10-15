@@ -146,7 +146,7 @@ class GroupServiceImplTest extends DaoTestBase {
         assertEquals("Клуб", member.get(0).getName());
         assertEquals(1, subscribed.size());
         assertEquals("Сборная", subscribed.get(0).getName());
-        assertEquals(List.of(kate.getId()), groupService.groupMembers(club.getId()));
+        assertEquals(List.of(kate.getId()), groupService.groupMembers(club.getId()).stream().map(u-> u.getId()).toList());
     }
 
     @Test

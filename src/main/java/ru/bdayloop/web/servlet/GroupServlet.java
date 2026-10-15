@@ -12,6 +12,7 @@ import ru.bdayloop.web.SessionUtil;
 import ru.bdayloop.web.dto.request.CreateGroupRequest;
 import ru.bdayloop.web.dto.request.UpdateGroupRequest;
 import ru.bdayloop.web.dto.response.GroupResponse;
+import ru.bdayloop.web.dto.response.UserResponse;
 import ru.bdayloop.web.exception.ExceptionHandler;
 
 import java.io.IOException;
@@ -86,8 +87,8 @@ public class GroupServlet extends HttpServlet {
                 int id =Integer.parseInt(parts[1]);
 
                 if(parts.length == 3 && parts[2].equals("members")){
-                    List<Integer> members = groupService.groupMembers(id);
-                    JsonUtil.writeBody(resp, members);
+                    List<User> members = groupService.groupMembers(id);
+                    JsonUtil.writeBody(resp, members.stream().map((u)-> UserResponse.from(u)).toList());
                 }
                 else {
                     Group group = groupService.findById(id);

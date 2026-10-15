@@ -12,7 +12,7 @@ public interface GroupService {
     List<Group> findAll();
     void joinGroup(int userId, int groupId) ;
     void subscribeToGroup(int subscriberId, int groupId) ;
-    List<Integer> groupMembers(int groupId) ;
+    List<User> groupMembers(int groupId) ;
     void delete(int groupId, int requesterId, User.Role requesterRole);
     void leaveGroup(int groupId, int userId);
     void unsubscribeFromGroup(int subscriberId, int groupId);
