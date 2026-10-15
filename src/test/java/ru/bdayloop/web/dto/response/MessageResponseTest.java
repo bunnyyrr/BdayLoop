@@ -29,6 +29,7 @@ class MessageResponseTest {
         assertEquals(10, response.id());
         assertEquals(1, response.subjectUserId());
         assertEquals(2, response.senderId());
+        assertEquals("friend", response.senderName());
         assertEquals("привет", response.text());
     }
 
@@ -37,6 +38,7 @@ class MessageResponseTest {
         MessageResponse response = MessageResponse.from(message(user(1, "birthday"), null));
 
         assertNull(response.senderId());
+        assertNull(response.senderName());
         assertEquals("привет", response.text());
     }
 }

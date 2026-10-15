@@ -33,7 +33,7 @@ async function loadMessages() {
     el.replaceChildren(...messages.map(m => {
         const p = document.createElement("p");
         const who = document.createElement("strong");
-        const author = m.senderId === null ? "аккаунт удален" : (m.senderId === me.id ? "Вы" : m.senderId);
+        const author = m.senderId === null ? "аккаунт удален" : (m.senderId === me.id ? "Вы" : m.senderName);
         who.textContent = author + ": ";
         p.append(who, m.text);
         return p;

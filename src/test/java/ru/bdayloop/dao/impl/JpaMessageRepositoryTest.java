@@ -2,6 +2,8 @@ package ru.bdayloop.dao.impl;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,5 +68,23 @@ class JpaMessageRepositoryTest extends DaoTestBase {
         em.clear();
 
         assertEquals(1, messageRepository.findBySubjectId(kate.getId()).size());
+    }
+
+    @Test
+    void findBySubjectId_loadsSendersWithOneQuery() {
+        User subject = newUser("subject");
+        for (int i = 0; i < 3; i++) {
+            messageRepository.save(new Message(subject, newUser("sender" + i), "привет"));
+        }
+        em.flush();
+        em.clear();
+        Statistics stats = em.getEntityManagerFactory().unwrap(SessionFactory.class).getStatistics();
+        stats.setStatisticsEnabled(true);
+        stats.clear();
+
+        List<Message> messages = messageRepository.findBySubjectId(subject.getId());
+        messages.forEach(m -> m.getSender().getName());
+
+        assertEquals(1, stats.getPrepareStatementCount());
     }
 }
