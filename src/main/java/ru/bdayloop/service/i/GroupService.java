@@ -3,7 +3,6 @@ package ru.bdayloop.service.i;
 import ru.bdayloop.model.Group;
 import ru.bdayloop.model.User;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface GroupService {

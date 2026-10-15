@@ -2,7 +2,6 @@ package ru.bdayloop.service.i;
 
 import ru.bdayloop.model.Message;
 
-import java.sql.SQLException;
 import java.util.List;
 
 public interface MessageService {
