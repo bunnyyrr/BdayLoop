@@ -2,6 +2,8 @@ package ru.bdayloop.dao.impl;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.hibernate.SessionFactory;
+import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +60,7 @@ class JpaMembershipRepositoryTest extends DaoTestBase {
     }
 
     @Test
-    void findMemberIds_returnsMembersOfThatGroupOnly() {
+    void findMembers_returnsUsersOfThatGroupOnly_withOneQuery() {
         User kate = newUser("kate");
         User anya = newUser("anya");
         Group club = groupRepository.save(new Group("Клуб", null));
@@ -68,12 +70,17 @@ class JpaMembershipRepositoryTest extends DaoTestBase {
         membershipRepository.save(new GroupMembership(team, kate));
         em.flush();
         em.clear();
+        Statistics stats = em.getEntityManagerFactory().unwrap(SessionFactory.class).getStatistics();
+        stats.setStatisticsEnabled(true);
+        stats.clear();
 
-        List<Integer> members = membershipRepository.findMemberIds(club.getId());
+        List<User> members = membershipRepository.findMembers(club.getId());
+        List<String> names = members.stream().map(u-> u.getName()).toList();
 
         assertEquals(2, members.size());
-        assertTrue(members.contains(kate.getId()));
-        assertTrue(members.contains(anya.getId()));
+        assertTrue(names.contains("kate"));
+        assertTrue(names.contains("anya"));
+        assertEquals(1, stats.getPrepareStatementCount());
     }
 
     @Test

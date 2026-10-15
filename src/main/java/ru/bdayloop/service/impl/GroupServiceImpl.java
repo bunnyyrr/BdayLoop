@@ -89,8 +89,8 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Integer> groupMembers(int groupId) {
-        return membershipRepository.findMemberIds(groupId);
+    public List<User> groupMembers(int groupId) {
+        return membershipRepository.findMembers(groupId);
     }
 
     @Override

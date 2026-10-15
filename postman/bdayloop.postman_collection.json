@@ -878,17 +878,14 @@
       }
     },
     {
-      "name": "33. Участники группы (на Д6 станет списком пользователей — поправишь проверку)",
+      "name": "33. Участники группы",
       "event": [
         {
           "listen": "test",
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test(\"200, Алиса среди участников\", () => {",
-              "    pm.response.to.have.status(200);",
-              "    pm.expect(pm.response.json()).to.include(Number(pm.collectionVariables.get(\"aliceId\")));",
-              "});"
+              "pm.expect(pm.response.json().map(u => u.id)).to.include(Number(pm.collectionVariables.get(\"aliceId\")));"
             ]
           }
         }

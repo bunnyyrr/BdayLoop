@@ -2,6 +2,7 @@ package ru.bdayloop.web.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.http.HttpServletResponse;
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.bdayloop.exception.BadRequestException;
@@ -11,7 +12,6 @@ import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.exception.UnauthorizedException;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 public class ExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);
@@ -25,7 +25,7 @@ public class ExceptionHandler {
             case ConflictException ex -> write(resp, 409, ex.getMessage());
             case NumberFormatException ex -> write(resp, 400, "Некорректный id");
             case JsonProcessingException ex -> write(resp, 400, "Некорректное тело запроса");
-            case SQLException ex -> handleSql(resp, ex);
+            case ConstraintViolationException ex -> handleConstraint(resp, ex);
             default -> {
                 log.error("Необработанная ошибка", e);
                 write(resp, 500, "Внутренняя ошибка сервера");
@@ -33,7 +33,7 @@ public class ExceptionHandler {
         }
     }
 
-    private static void handleSql(HttpServletResponse resp, SQLException e) throws IOException {
+    private static void handleConstraint(HttpServletResponse resp, ConstraintViolationException e) throws IOException {
         switch (String.valueOf(e.getSQLState())) {
             case "23505" -> write(resp, 409, "Такая запись уже существует");
             case "23503" -> write(resp, 404, "Связанная запись не найдена");

@@ -19,19 +19,16 @@ async function loadGroup() {
 
 async function loadMembers() {
     const res = await apiFetch(`/groups/${groupId}/members`);
-    const memberIds = await res.json();
+    const users = await res.json();
 
-    const isMember = memberIds.includes(me.id);
+    const isMember = users.some(u => u.id === me.id);
     document.getElementById("joinBtn").hidden = isMember;
     document.getElementById("leaveBtn").hidden = !isMember;
 
-    const users = await Promise.all(
-        memberIds.map(id => apiFetch(`/users/${id}`).then(r => r.json()))
-    );
-
     const el = document.getElementById("membersList");
     el.innerHTML = users.length
-        ? users.map(u => `<li><a href="user.html?id=${u.id}">${escapeHtml(u.name)}</a></li>`).join("")        : "<li>Участников пока нет.</li>";
+        ? users.map(u => `<li><a href="user.html?id=${u.id}">${escapeHtml(u.name)}</a></li>`).join("")
+        : "<li>Участников пока нет.</li>";
 }
 
 async function loadSubscriptionStatus() {

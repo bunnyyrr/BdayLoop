@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 import ru.bdayloop.model.GroupMembership;
+import ru.bdayloop.model.User;
 import ru.bdayloop.model.id.GroupMembershipId;
 import ru.bdayloop.repository.i.MembershipRepository;
 
@@ -34,10 +35,9 @@ public class JpaMembershipRepository implements MembershipRepository {
     }
 
     @Override
-    public List<Integer> findMemberIds(Integer groupId) {
+    public List<User> findMembers(Integer groupId) {
         return em.createQuery(
-                        "select m.id.userId from GroupMembership m where m.id.groupId = :groupId order by m.joinedAt, m.id.userId",
-                        Integer.class)
+                        "select m.user from GroupMembership m where m.id.groupId = :groupId order by m.joinedAt, m.id.userId", User.class)
                 .setParameter("groupId", groupId)
                 .getResultList();
     }

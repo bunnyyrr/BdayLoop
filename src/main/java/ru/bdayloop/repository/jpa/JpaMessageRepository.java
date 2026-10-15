@@ -24,7 +24,7 @@ public class JpaMessageRepository implements MessageRepository {
 
     @Override
     public List<Message> findBySubjectId(Integer subjectId){
-        return em.createQuery("select m from Message m where m.subject.id=:subjectId order by m.createdAt, m.id", Message.class)
+        return em.createQuery("select m from Message m left join fetch m.sender where m.subject.id=:subjectId order by m.createdAt, m.id", Message.class)
                 .setParameter("subjectId", subjectId)
                 .getResultList();
     }
