@@ -9,13 +9,9 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import ru.bdayloop.config.AppConfig;
-import ru.bdayloop.service.i.GroupService;
-import ru.bdayloop.service.i.MessageService;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.web.CorsFilter;
 import ru.bdayloop.web.WebConfig;
-import ru.bdayloop.web.servlet.GroupServlet;
-import ru.bdayloop.web.servlet.MessageServlet;
 import ru.bdayloop.web.servlet.UserServlet;
 
 
@@ -34,8 +30,6 @@ public class Application {
         server.setHandler(context);
 
         context.addServlet(new ServletHolder(new UserServlet(ctx.getBean(UserService.class))), "/users/*");
-        context.addServlet(new ServletHolder(new GroupServlet(ctx.getBean(GroupService.class))), "/groups/*");
-        context.addServlet(new ServletHolder(new MessageServlet(ctx.getBean(MessageService.class))), "/messages/*");
         context.addFilter(CorsFilter.class, "/*", null);
 
         AnnotationConfigWebApplicationContext webCtx = new AnnotationConfigWebApplicationContext();
