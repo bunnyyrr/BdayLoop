@@ -10,10 +10,7 @@ import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.web.AuthUser;
 import ru.bdayloop.web.SessionUtil;
-import ru.bdayloop.web.dto.request.ImportUserRequest;
-import ru.bdayloop.web.dto.request.LoginRequest;
-import ru.bdayloop.web.dto.request.RegisterRequest;
-import ru.bdayloop.web.dto.request.UpdateUserRequest;
+import ru.bdayloop.web.dto.request.*;
 import ru.bdayloop.web.dto.response.SubscriptionStatusResponse;
 import ru.bdayloop.web.dto.response.UserResponse;
 
@@ -76,6 +73,13 @@ public class UserController {
     @PutMapping("/{id}")
     public UserResponse update(@PathVariable int id, @RequestBody UpdateUserRequest body, AuthUser user) {
         return UserResponse.from(userService.update(id, body.name(), body.birthday(), body.username(), user.id()));
+    }
+
+    @PutMapping("/{id}/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(@PathVariable int id, @RequestBody ChangePasswordRequest body, AuthUser user, HttpServletRequest req){
+        userService.changePassword(id, body.oldPassword(), body.newPassword(), user.id());
+        req.changeSessionId();
     }
 
     @PostMapping("/{id}/subscribe")

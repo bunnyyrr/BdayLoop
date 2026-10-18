@@ -2,10 +2,8 @@ package ru.bdayloop.dao.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.bdayloop.exception.BadRequestException;
-import ru.bdayloop.exception.ConflictException;
-import ru.bdayloop.exception.ForbiddenException;
-import ru.bdayloop.exception.NotFoundException;
+import org.springframework.transaction.support.TransactionTemplate;
+import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
@@ -133,6 +131,57 @@ class UserServiceImplTest extends DaoTestBase {
         User kate = createUser("kate");
 
         assertThrows(BadRequestException.class, () -> userService.update(kate.getId(), " ", LocalDate.of(2000, 1, 1), "kate", kate.getId()));
+    }
+
+    @Test
+    void changePassword_withCorrectOldPassword_switchesLogin() {
+        User kate = registerUser("kate", "old-pass");
+
+        userService.changePassword(kate.getId(), "old-pass", "new-pass", kate.getId());
+
+        assertEquals(kate.getId(), userService.login("kate", "new-pass").getId());
+        assertThrows(UnauthorizedException.class, () -> userService.login("kate", "old-pass"));
+    }
+
+    @Test
+    void changePassword_withWrongOldPassword_isRejected() {
+        User kate = registerUser("kate", "old-pass");
+
+        assertThrows(BadRequestException.class,
+                () -> userService.changePassword(kate.getId(), "wrong", "new-pass", kate.getId()));
+
+        assertEquals(kate.getId(), userService.login("kate", "old-pass").getId());
+    }
+
+    @Test
+    void changePassword_ofAnotherUser_isForbidden() {
+        User kate = registerUser("kate", "old-pass");
+        User anya = registerUser("anya", "anya-pass");
+
+        assertThrows(ForbiddenException.class,
+                () -> userService.changePassword(kate.getId(), "old-pass", "new-pass", anya.getId()));
+    }
+
+    @Test
+    void changePassword_withBlankNewPassword_isRejected() {
+        User kate = registerUser("kate", "old-pass");
+
+        assertThrows(BadRequestException.class,
+                () -> userService.changePassword(kate.getId(), "old-pass", " ", kate.getId()));
+    }
+
+    @Test
+    void login_withHashCreatedByOldJBCrypt_stillWorks() {
+        String legacyHash = "$2a$10$/OF05P8vcSyNncQi2ZczcewEWXN7cFca9Kj5b/1wCKhHMUHO7fHja";
+        User legacy = new TransactionTemplate(transactionManager).execute(status -> userRepository.save(
+                new User(null, "legacy", LocalDate.of(2000, 1, 1), "legacy", legacyHash, User.Role.USER)));
+
+        assertEquals(legacy.getId(), userService.login("legacy", "secret").getId());
+    }
+
+    private User registerUser(String username, String password) {
+        return userService.register(
+                new User(null, username, LocalDate.of(2000, 1, 1), username, null, User.Role.USER), password);
     }
 
     private UserRegistration registration(String username) {

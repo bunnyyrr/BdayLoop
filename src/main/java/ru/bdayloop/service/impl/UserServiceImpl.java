@@ -1,6 +1,6 @@
 package ru.bdayloop.service.impl;
 
-import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.bdayloop.exception.*;
@@ -22,9 +22,11 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final SubscriptionRepository subscriptionRepository;
-    public UserServiceImpl(UserRepository userRepository, SubscriptionRepository subscriptionRepository){
+    private final PasswordEncoder passwordEncoder;
+    public UserServiceImpl(UserRepository userRepository, SubscriptionRepository subscriptionRepository, PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -35,7 +37,7 @@ public class UserServiceImpl implements UserService {
             throw new ConflictException("Логин «" + user.getUsername() + "» уже занят");
         }
 
-        String hash = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
+        String hash = passwordEncoder.encode(plainPassword);
         User toCreateUser = new User(
                 null,
                 user.getName(),
@@ -54,7 +56,7 @@ public class UserServiceImpl implements UserService {
         Validation.requireText(plainPassword, "Введите пароль");
 
         Optional<User> found = userRepository.findByUsername(username);
-        if(found.isEmpty() || !BCrypt.checkpw(plainPassword, found.get().getPasswordHash())){
+        if(found.isEmpty() || !passwordEncoder.matches(plainPassword, found.get().getPasswordHash())){
             throw new UnauthorizedException("Неверный логин или пароль");
         }
         return found.get();
@@ -92,6 +94,21 @@ public class UserServiceImpl implements UserService {
         User managed = findExistingUser(id);
         managed.updateProfile(name, birthday, username);
         return managed;
+    }
+
+    @Override
+    public void changePassword(int id, String oldPassword, String newPassword, int requesterId){
+        if(id !=requesterId){
+            throw new ForbiddenException("Можно менять пароль только своего аккаунта");
+        }
+        Validation.requireText(oldPassword, "Введите текущий пароль");
+        Validation.requireText(newPassword, "Введите новый пароль");
+
+        User user = findExistingUser(id);
+        if(!passwordEncoder.matches(oldPassword, user.getPasswordHash())){
+            throw new BadRequestException("Неверный текущий пароль");
+        }
+        user.changePasswordHash(passwordEncoder.encode(newPassword));
     }
 
     @Override

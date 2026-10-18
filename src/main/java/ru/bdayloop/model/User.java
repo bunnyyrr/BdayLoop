@@ -63,4 +63,8 @@ public class User {
         this.birthday= birthday;
         this.username= username;
     }
+
+    public void changePasswordHash(String passwordHash){
+        this.passwordHash= passwordHash;
+    }
 }
