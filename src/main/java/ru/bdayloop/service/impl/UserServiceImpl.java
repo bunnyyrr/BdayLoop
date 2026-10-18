@@ -79,19 +79,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User update(User user, int requesterId){
-        if(user.getId() != requesterId){
+    public User update(int id, String name, LocalDate birthday, String username, int requesterId){
+        if(id != requesterId){
             throw new ForbiddenException("Можно редактировать только свой профиль");
         }
-        validateProfile(user.getName(), user.getBirthday(), user.getUsername());
-        Optional<User> sameUsername = userRepository.findByUsername(user.getUsername());
-        if(sameUsername.isPresent() && !sameUsername.get().getId().equals(user.getId())){
-            throw new ConflictException("Логин «" + user.getUsername() + "» уже занят");
+        validateProfile(name, birthday, username);
+        Optional<User> sameUsername = userRepository.findByUsername(username);
+        if(sameUsername.isPresent() && !sameUsername.get().getId().equals(id)){
+            throw new ConflictException("Логин «" + username + "» уже занят");
         }
 
-        User managed = userRepository.findById(user.getId())
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + user.getId() + " не найден"));
-        managed.updateProfile(user.getName(), user.getBirthday(), user.getUsername());
+        User managed = findExistingUser(id);
+        managed.updateProfile(name, birthday, username);
         return managed;
     }
 

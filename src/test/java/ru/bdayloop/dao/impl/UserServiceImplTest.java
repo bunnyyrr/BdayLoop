@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.bdayloop.exception.BadRequestException;
 import ru.bdayloop.exception.ConflictException;
+import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.NotFoundException;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.command.UserRegistration;
@@ -86,6 +87,52 @@ class UserServiceImplTest extends DaoTestBase {
         userService.delete(anya.getId(), anya.getId());
 
         assertFalse(userService.isSubscribedDirectly(kate.getId(), anya.getId()));
+    }
+
+    @Test
+    void update_changesOwnProfile_andKeepsRoleAndPassword() {
+        User kate = createUser("kate");
+
+        userService.update(kate.getId(), "Катя", LocalDate.of(1999, 5, 20), "kate2", kate.getId());
+
+        User reloaded = userService.findById(kate.getId());
+        assertEquals("Катя", reloaded.getName());
+        assertEquals(LocalDate.of(1999, 5, 20), reloaded.getBirthday());
+        assertEquals("kate2", reloaded.getUsername());
+        assertEquals(User.Role.USER, reloaded.getRole());
+        assertEquals("hash", reloaded.getPasswordHash());
+    }
+
+    @Test
+    void update_ofAnotherUser_isForbidden() {
+        User kate = createUser("kate");
+        User anya = createUser("anya");
+
+        assertThrows(ForbiddenException.class, () -> userService.update(kate.getId(), "Взлом", LocalDate.of(2000, 1, 1), "kate", anya.getId()));
+    }
+
+    @Test
+    void update_withTakenUsername_isConflict() {
+        User kate = createUser("kate");
+        createUser("anya");
+
+        assertThrows(ConflictException.class, () -> userService.update(kate.getId(), "Катя", LocalDate.of(2000, 1, 1), "anya", kate.getId()));
+    }
+
+    @Test
+    void update_keepingOwnUsername_isAllowed() {
+        User kate = createUser("kate");
+
+        userService.update(kate.getId(), "Катя", LocalDate.of(2000, 1, 1), "kate", kate.getId());
+
+        assertEquals("Катя", userService.findById(kate.getId()).getName());
+    }
+
+    @Test
+    void update_withBlankName_isRejected() {
+        User kate = createUser("kate");
+
+        assertThrows(BadRequestException.class, () -> userService.update(kate.getId(), " ", LocalDate.of(2000, 1, 1), "kate", kate.getId()));
     }
 
     private UserRegistration registration(String username) {

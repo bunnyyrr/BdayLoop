@@ -75,9 +75,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     public UserResponse update(@PathVariable int id, @RequestBody UpdateUserRequest body, AuthUser user) {
-        User existing = userService.findById(id);
-        User updated = new User(existing.getId(), body.name(), body.birthday(), body.username(), existing.getPasswordHash(), existing.getRole());
-        return UserResponse.from(userService.update(updated, user.id()));
+        return UserResponse.from(userService.update(id, body.name(), body.birthday(), body.username(), user.id()));
     }
 
     @PostMapping("/{id}/subscribe")
