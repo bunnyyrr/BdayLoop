@@ -9,7 +9,6 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 import ru.bdayloop.config.AppConfig;
-import ru.bdayloop.web.CorsFilter;
 import ru.bdayloop.web.WebConfig;
 
 
@@ -26,8 +25,6 @@ public class Application {
         context.setContextPath("/");
         context.getSessionHandler().setHttpOnly(true);
         server.setHandler(context);
-
-        context.addFilter(CorsFilter.class, "/*", null);
 
         AnnotationConfigWebApplicationContext webCtx = new AnnotationConfigWebApplicationContext();
         webCtx.register(WebConfig.class);

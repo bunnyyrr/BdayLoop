@@ -2,7 +2,6 @@ package ru.bdayloop.web;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import ru.bdayloop.exception.ForbiddenException;
 import ru.bdayloop.exception.UnauthorizedException;
 import ru.bdayloop.model.User;
 
@@ -30,15 +29,6 @@ public class SessionUtil {
             throw new UnauthorizedException("Требуется авторизация");
         }
         return (int) session.getAttribute(USER_ID_KEY);
-    }
-
-    public static void requireAdmin(HttpServletRequest req){
-        requireUserId(req);
-        HttpSession session = req.getSession(false);
-        String role =(String) session.getAttribute(ROLE_KEY);
-        if(!"ADMIN".equals(role)){
-            throw new ForbiddenException("Требуются права администратора");
-        }
     }
 
     public static User.Role currentRole(HttpServletRequest req){
