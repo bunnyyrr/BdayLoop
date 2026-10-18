@@ -6,13 +6,14 @@ import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 import ru.bdayloop.config.AppConfig;
-import ru.bdayloop.service.i.GiftService;
 import ru.bdayloop.service.i.GroupService;
 import ru.bdayloop.service.i.MessageService;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.web.CorsFilter;
-import ru.bdayloop.web.servlet.GiftServlet;
+import ru.bdayloop.web.WebConfig;
 import ru.bdayloop.web.servlet.GroupServlet;
 import ru.bdayloop.web.servlet.MessageServlet;
 import ru.bdayloop.web.servlet.UserServlet;
@@ -34,9 +35,14 @@ public class Application {
 
         context.addServlet(new ServletHolder(new UserServlet(ctx.getBean(UserService.class))), "/users/*");
         context.addServlet(new ServletHolder(new GroupServlet(ctx.getBean(GroupService.class))), "/groups/*");
-        context.addServlet(new ServletHolder(new GiftServlet(ctx.getBean(GiftService.class))), "/gifts/*");
         context.addServlet(new ServletHolder(new MessageServlet(ctx.getBean(MessageService.class))), "/messages/*");
         context.addFilter(CorsFilter.class, "/*", null);
+
+        AnnotationConfigWebApplicationContext webCtx = new AnnotationConfigWebApplicationContext();
+        webCtx.register(WebConfig.class);
+        webCtx.setParent(ctx);
+        context.addServlet(new ServletHolder("dispatcher", new DispatcherServlet(webCtx)), "/");
+
         server.start();
         log.info("Сервер запущен на http://localhost:8080");
         server.join();

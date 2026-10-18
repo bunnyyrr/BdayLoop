@@ -4,16 +4,13 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import javax.sql.DataSource;
 
 @Configuration
-@ComponentScan("ru.bdayloop")
+@ComponentScan(basePackages= "ru.bdayloop", excludeFilters= @ComponentScan.Filter(type = FilterType.REGEX, pattern = "ru\\.bdayloop\\.web\\..*"))
 @PropertySource("classpath:application.properties")
 @PropertySource(value = "file:.env", ignoreResourceNotFound = true)
 public class AppConfig {
