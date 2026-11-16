@@ -28,7 +28,7 @@ public class GroupController {
     }
 
     @GetMapping
-    public List<GroupResponse> find(@RequestParam(required = false) String name, @RequestParam(required = false) Integer memberId) {
+    public List<GroupResponse> find(@RequestParam(required = false) String name, @RequestParam(required = false) Integer memberId, AuthUser user) {
         List<Group> groups;
         if (memberId != null) {
             groups = groupService.findByMember(memberId);
@@ -46,12 +46,12 @@ public class GroupController {
     }
 
     @GetMapping("/{id}")
-    public GroupResponse get(@PathVariable int id) {
+    public GroupResponse get(@PathVariable int id, AuthUser user) {
         return GroupResponse.from(groupService.findById(id));
     }
 
     @GetMapping("/{id}/members")
-    public List<UserResponse> members(@PathVariable int id) {
+    public List<UserResponse> members(@PathVariable int id, AuthUser user) {
         return groupService.groupMembers(id).stream().map(u -> UserResponse.from(u)).toList();
     }
 
