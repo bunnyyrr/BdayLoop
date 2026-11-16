@@ -25,7 +25,7 @@ public class GiftController {
     }
 
     @GetMapping
-    public List<GiftResponse> findByUserId(@RequestParam int userId){
+    public List<GiftResponse> findByUserId(@RequestParam int userId, AuthUser user){
         return giftService.findByUserId(userId).stream().map(g -> GiftResponse.from(g)).toList();
     }
 

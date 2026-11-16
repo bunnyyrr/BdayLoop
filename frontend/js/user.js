@@ -100,6 +100,21 @@ document.getElementById("editForm")?.addEventListener("submit", async (e) => {
     }
 });
 
+document.getElementById("passwordForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const body = {
+        oldPassword: document.getElementById("oldPassword").value,
+        newPassword: document.getElementById("newPassword").value
+    };
+    const res = await apiFetch(`/users/${profileId}/password`, { method: "PUT", body: JSON.stringify(body) });
+    if (res.ok) {
+        e.target.reset();
+        alert("Пароль изменён");
+    } else {
+        alert(await res.text());
+    }
+});
+
 document.getElementById("addGiftForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const title = document.getElementById("giftTitle").value;

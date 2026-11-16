@@ -3,6 +3,7 @@ package ru.bdayloop.service.i;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.command.UserRegistration;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface UserService {
@@ -11,10 +12,11 @@ public interface UserService {
     User findById(int id) ;
     List<User> findByName(String name) ;
     User findByUsername(String username) ;
-    User update(User user, int requesterId) ;
+    User update(int id, String name, LocalDate birthday, String username, int requesterId) ;
     void delete(int id, int requesterId);
     void subscribe(int subscriberId, int targetId);
     void unsubscribe(int subscriberId, int targetId);
-    List<User> importUsers(List<UserRegistration> registrations);
+    List<User> importUsers(List<UserRegistration> registrations, User.Role requesterRole);
     boolean isSubscribedDirectly(int subscriberId, int targetId) ;
+    void changePassword(int id, String oldPassword, String newPassword, int requesterId);
 }

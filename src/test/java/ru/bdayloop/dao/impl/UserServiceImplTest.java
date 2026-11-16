@@ -2,9 +2,8 @@ package ru.bdayloop.dao.impl;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.bdayloop.exception.BadRequestException;
-import ru.bdayloop.exception.ConflictException;
-import ru.bdayloop.exception.NotFoundException;
+import org.springframework.transaction.support.TransactionTemplate;
+import ru.bdayloop.exception.*;
 import ru.bdayloop.model.User;
 import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
@@ -24,17 +23,52 @@ class UserServiceImplTest extends DaoTestBase {
         createUser("taken");
         List<UserRegistration> batch = List.of(registration("first"), registration("second"), registration("taken"));
 
-        assertThrows(ConflictException.class, () -> userService.importUsers(batch));
+        ConflictException e = assertThrows(ConflictException.class,
+                () -> userService.importUsers(batch, User.Role.ADMIN));
 
+        assertTrue(e.getMessage().startsWith("Строка 3:"));
         assertTrue(userRepository.findByUsername("first").isEmpty());
         assertTrue(userRepository.findByUsername("second").isEmpty());
+    }
+
+    @Test
+    void importUsers_whenLoginRepeatsInsideBatch_savesNobody() {
+        List<UserRegistration> batch = List.of(registration("first"), registration("first"));
+
+        ConflictException e = assertThrows(ConflictException.class,
+                () -> userService.importUsers(batch, User.Role.ADMIN));
+
+        assertTrue(e.getMessage().startsWith("Строка 2:"));
+        assertTrue(userRepository.findByUsername("first").isEmpty());
+    }
+
+    @Test
+    void importUsers_whenFieldIsInvalid_namesTheRowAndSavesNobody() {
+        UserRegistration broken = new UserRegistration(
+                new User(null, " ", LocalDate.of(2000, 1, 1), "broken", null, User.Role.USER), "secret");
+        List<UserRegistration> batch = List.of(registration("first"), broken);
+
+        BadRequestException e = assertThrows(BadRequestException.class,
+                () -> userService.importUsers(batch, User.Role.ADMIN));
+
+        assertEquals("Строка 2: Имя не может быть пустым", e.getMessage());
+        assertTrue(userRepository.findByUsername("first").isEmpty());
+    }
+
+    @Test
+    void importUsers_byRegularUser_isForbidden() {
+        List<UserRegistration> batch = List.of(registration("first"));
+
+        assertThrows(ForbiddenException.class, () -> userService.importUsers(batch, User.Role.USER));
+
+        assertTrue(userRepository.findByUsername("first").isEmpty());
     }
 
     @Test
     void importUsers_whenAllValid_savesEveryone()  {
         List<UserRegistration> batch = List.of(registration("first"), registration("second"));
 
-        List<User> created = userService.importUsers(batch);
+        List<User> created = userService.importUsers(batch, User.Role.ADMIN);
 
         assertEquals(2, created.size());
         assertTrue(userRepository.findByUsername("first").isPresent());
@@ -86,6 +120,103 @@ class UserServiceImplTest extends DaoTestBase {
         userService.delete(anya.getId(), anya.getId());
 
         assertFalse(userService.isSubscribedDirectly(kate.getId(), anya.getId()));
+    }
+
+    @Test
+    void update_changesOwnProfile_andKeepsRoleAndPassword() {
+        User kate = createUser("kate");
+
+        userService.update(kate.getId(), "Катя", LocalDate.of(1999, 5, 20), "kate2", kate.getId());
+
+        User reloaded = userService.findById(kate.getId());
+        assertEquals("Катя", reloaded.getName());
+        assertEquals(LocalDate.of(1999, 5, 20), reloaded.getBirthday());
+        assertEquals("kate2", reloaded.getUsername());
+        assertEquals(User.Role.USER, reloaded.getRole());
+        assertEquals("hash", reloaded.getPasswordHash());
+    }
+
+    @Test
+    void update_ofAnotherUser_isForbidden() {
+        User kate = createUser("kate");
+        User anya = createUser("anya");
+
+        assertThrows(ForbiddenException.class, () -> userService.update(kate.getId(), "Взлом", LocalDate.of(2000, 1, 1), "kate", anya.getId()));
+    }
+
+    @Test
+    void update_withTakenUsername_isConflict() {
+        User kate = createUser("kate");
+        createUser("anya");
+
+        assertThrows(ConflictException.class, () -> userService.update(kate.getId(), "Катя", LocalDate.of(2000, 1, 1), "anya", kate.getId()));
+    }
+
+    @Test
+    void update_keepingOwnUsername_isAllowed() {
+        User kate = createUser("kate");
+
+        userService.update(kate.getId(), "Катя", LocalDate.of(2000, 1, 1), "kate", kate.getId());
+
+        assertEquals("Катя", userService.findById(kate.getId()).getName());
+    }
+
+    @Test
+    void update_withBlankName_isRejected() {
+        User kate = createUser("kate");
+
+        assertThrows(BadRequestException.class, () -> userService.update(kate.getId(), " ", LocalDate.of(2000, 1, 1), "kate", kate.getId()));
+    }
+
+    @Test
+    void changePassword_withCorrectOldPassword_switchesLogin() {
+        User kate = registerUser("kate", "old-pass");
+
+        userService.changePassword(kate.getId(), "old-pass", "new-pass", kate.getId());
+
+        assertEquals(kate.getId(), userService.login("kate", "new-pass").getId());
+        assertThrows(UnauthorizedException.class, () -> userService.login("kate", "old-pass"));
+    }
+
+    @Test
+    void changePassword_withWrongOldPassword_isRejected() {
+        User kate = registerUser("kate", "old-pass");
+
+        assertThrows(BadRequestException.class,
+                () -> userService.changePassword(kate.getId(), "wrong", "new-pass", kate.getId()));
+
+        assertEquals(kate.getId(), userService.login("kate", "old-pass").getId());
+    }
+
+    @Test
+    void changePassword_ofAnotherUser_isForbidden() {
+        User kate = registerUser("kate", "old-pass");
+        User anya = registerUser("anya", "anya-pass");
+
+        assertThrows(ForbiddenException.class,
+                () -> userService.changePassword(kate.getId(), "old-pass", "new-pass", anya.getId()));
+    }
+
+    @Test
+    void changePassword_withBlankNewPassword_isRejected() {
+        User kate = registerUser("kate", "old-pass");
+
+        assertThrows(BadRequestException.class,
+                () -> userService.changePassword(kate.getId(), "old-pass", " ", kate.getId()));
+    }
+
+    @Test
+    void login_withHashCreatedByOldJBCrypt_stillWorks() {
+        String legacyHash = "$2a$10$/OF05P8vcSyNncQi2ZczcewEWXN7cFca9Kj5b/1wCKhHMUHO7fHja";
+        User legacy = new TransactionTemplate(transactionManager).execute(status -> userRepository.save(
+                new User(null, "legacy", LocalDate.of(2000, 1, 1), "legacy", legacyHash, User.Role.USER)));
+
+        assertEquals(legacy.getId(), userService.login("legacy", "secret").getId());
+    }
+
+    private User registerUser(String username, String password) {
+        return userService.register(
+                new User(null, username, LocalDate.of(2000, 1, 1), username, null, User.Role.USER), password);
     }
 
     private UserRegistration registration(String username) {

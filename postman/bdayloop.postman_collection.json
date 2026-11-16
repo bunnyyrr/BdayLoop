@@ -589,7 +589,7 @@
       "request": {
         "method": "POST",
         "header": [],
-        "url": "{{host}}/users/nope"
+        "url": "{{host}}/users/1/nope"
       }
     },
     {

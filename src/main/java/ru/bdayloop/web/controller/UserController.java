@@ -10,10 +10,7 @@ import ru.bdayloop.service.command.UserRegistration;
 import ru.bdayloop.service.i.UserService;
 import ru.bdayloop.web.AuthUser;
 import ru.bdayloop.web.SessionUtil;
-import ru.bdayloop.web.dto.request.ImportUserRequest;
-import ru.bdayloop.web.dto.request.LoginRequest;
-import ru.bdayloop.web.dto.request.RegisterRequest;
-import ru.bdayloop.web.dto.request.UpdateUserRequest;
+import ru.bdayloop.web.dto.request.*;
 import ru.bdayloop.web.dto.response.SubscriptionStatusResponse;
 import ru.bdayloop.web.dto.response.UserResponse;
 
@@ -51,11 +48,8 @@ public class UserController {
     @PostMapping("/import")
     @ResponseStatus(HttpStatus.CREATED)
     public List<UserResponse> importUsers(AuthUser user, @RequestBody List<ImportUserRequest> body) {
-        if (user.role() != User.Role.ADMIN) {
-            throw new ForbiddenException("Требуются права администратора");
-        }
         List<UserRegistration> registrations = body.stream().map(r -> new UserRegistration(new User(0, r.name(), r.birthday(), r.username(), null, parseRole(r.role())), r.password())).toList();
-        return userService.importUsers(registrations).stream().map(u -> UserResponse.from(u)).toList();
+        return userService.importUsers(registrations, user.role()).stream().map(u -> UserResponse.from(u)).toList();
     }
 
     @GetMapping
@@ -75,9 +69,14 @@ public class UserController {
 
     @PutMapping("/{id}")
     public UserResponse update(@PathVariable int id, @RequestBody UpdateUserRequest body, AuthUser user) {
-        User existing = userService.findById(id);
-        User updated = new User(existing.getId(), body.name(), body.birthday(), body.username(), existing.getPasswordHash(), existing.getRole());
-        return UserResponse.from(userService.update(updated, user.id()));
+        return UserResponse.from(userService.update(id, body.name(), body.birthday(), body.username(), user.id()));
+    }
+
+    @PutMapping("/{id}/password")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void changePassword(@PathVariable int id, @RequestBody ChangePasswordRequest body, AuthUser user, HttpServletRequest req){
+        userService.changePassword(id, body.oldPassword(), body.newPassword(), user.id());
+        req.changeSessionId();
     }
 
     @PostMapping("/{id}/subscribe")
