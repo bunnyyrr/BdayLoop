@@ -23,17 +23,52 @@ class UserServiceImplTest extends DaoTestBase {
         createUser("taken");
         List<UserRegistration> batch = List.of(registration("first"), registration("second"), registration("taken"));
 
-        assertThrows(ConflictException.class, () -> userService.importUsers(batch));
+        ConflictException e = assertThrows(ConflictException.class,
+                () -> userService.importUsers(batch, User.Role.ADMIN));
 
+        assertTrue(e.getMessage().startsWith("Строка 3:"));
         assertTrue(userRepository.findByUsername("first").isEmpty());
         assertTrue(userRepository.findByUsername("second").isEmpty());
+    }
+
+    @Test
+    void importUsers_whenLoginRepeatsInsideBatch_savesNobody() {
+        List<UserRegistration> batch = List.of(registration("first"), registration("first"));
+
+        ConflictException e = assertThrows(ConflictException.class,
+                () -> userService.importUsers(batch, User.Role.ADMIN));
+
+        assertTrue(e.getMessage().startsWith("Строка 2:"));
+        assertTrue(userRepository.findByUsername("first").isEmpty());
+    }
+
+    @Test
+    void importUsers_whenFieldIsInvalid_namesTheRowAndSavesNobody() {
+        UserRegistration broken = new UserRegistration(
+                new User(null, " ", LocalDate.of(2000, 1, 1), "broken", null, User.Role.USER), "secret");
+        List<UserRegistration> batch = List.of(registration("first"), broken);
+
+        BadRequestException e = assertThrows(BadRequestException.class,
+                () -> userService.importUsers(batch, User.Role.ADMIN));
+
+        assertEquals("Строка 2: Имя не может быть пустым", e.getMessage());
+        assertTrue(userRepository.findByUsername("first").isEmpty());
+    }
+
+    @Test
+    void importUsers_byRegularUser_isForbidden() {
+        List<UserRegistration> batch = List.of(registration("first"));
+
+        assertThrows(ForbiddenException.class, () -> userService.importUsers(batch, User.Role.USER));
+
+        assertTrue(userRepository.findByUsername("first").isEmpty());
     }
 
     @Test
     void importUsers_whenAllValid_savesEveryone()  {
         List<UserRegistration> batch = List.of(registration("first"), registration("second"));
 
-        List<User> created = userService.importUsers(batch);
+        List<User> created = userService.importUsers(batch, User.Role.ADMIN);
 
         assertEquals(2, created.size());
         assertTrue(userRepository.findByUsername("first").isPresent());

@@ -48,11 +48,8 @@ public class UserController {
     @PostMapping("/import")
     @ResponseStatus(HttpStatus.CREATED)
     public List<UserResponse> importUsers(AuthUser user, @RequestBody List<ImportUserRequest> body) {
-        if (user.role() != User.Role.ADMIN) {
-            throw new ForbiddenException("Требуются права администратора");
-        }
         List<UserRegistration> registrations = body.stream().map(r -> new UserRegistration(new User(0, r.name(), r.birthday(), r.username(), null, parseRole(r.role())), r.password())).toList();
-        return userService.importUsers(registrations).stream().map(u -> UserResponse.from(u)).toList();
+        return userService.importUsers(registrations, user.role()).stream().map(u -> UserResponse.from(u)).toList();
     }
 
     @GetMapping

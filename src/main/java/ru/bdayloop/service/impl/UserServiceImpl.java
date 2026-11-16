@@ -140,10 +140,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> importUsers(List<UserRegistration> registrations){
+    public List<User> importUsers(List<UserRegistration> registrations,  User.Role requesterRole){
+        if (requesterRole != User.Role.ADMIN) {
+            throw new ForbiddenException("Требуются права администратора");
+        }
         List<User> created = new ArrayList<>();
-        for(UserRegistration r : registrations) {
-            created.add(register(r.user(), r.password()));
+        for(int i=0; i< registrations.size(); i++) {
+            UserRegistration r= registrations.get(i);
+            try {
+                created.add(register(r.user(), r.password()));
+            } catch (BadRequestException e){
+                throw new BadRequestException("Строка " + (i + 1) + ": " + e.getMessage());
+            } catch (ConflictException e){
+                throw new ConflictException("Строка " + (i + 1) + ": " + e.getMessage());
+            }
         }
         return created;
     }

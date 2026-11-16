@@ -16,7 +16,7 @@ public interface UserService {
     void delete(int id, int requesterId);
     void subscribe(int subscriberId, int targetId);
     void unsubscribe(int subscriberId, int targetId);
-    List<User> importUsers(List<UserRegistration> registrations);
+    List<User> importUsers(List<UserRegistration> registrations, User.Role requesterRole);
     boolean isSubscribedDirectly(int subscriberId, int targetId) ;
     void changePassword(int id, String oldPassword, String newPassword, int requesterId);
 }
